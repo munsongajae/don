@@ -46,6 +46,35 @@ Thumbs.db
 # Streamlit
 .streamlit/
 
+# Node.js / Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+build/
+.cache/
+
+# Frontend build outputs
+frontend/dist/
+frontend/build/
+frontend/.vite/
+
+# Backend
+backend/__pycache__/
+backend/*.pyc
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+backend/.env
+
+# Python virtual environment (backend specific)
+backend/venv/
+backend/env/
+backend/ENV/
+
+
 
 
 

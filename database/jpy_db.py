@@ -12,10 +12,46 @@ def save_jpy_investment(investment_data: Dict) -> bool:
         return False
     
     try:
-        supabase.table('jpy_investments').insert(investment_data).execute()
+        # 데이터 정리: None 값, NaN 값, 잘못된 타입 처리
+        cleaned_data = {}
+        for key, value in investment_data.items():
+            if value is None:
+                # memo는 None일 수 있음 (선택적 필드)
+                if key == 'memo':
+                    cleaned_data[key] = None  # None 유지 (데이터베이스에서 NULL 허용)
+                # 다른 None 값은 제외
+                continue
+            elif isinstance(value, float):
+                # NaN 체크
+                import math
+                if math.isnan(value) or math.isinf(value):
+                    continue
+                cleaned_data[key] = value
+            elif isinstance(value, (int, str, bool)):
+                cleaned_data[key] = value
+            elif hasattr(value, 'isoformat'):  # datetime 객체
+                cleaned_data[key] = value.isoformat()
+            else:
+                # 다른 타입은 문자열로 변환
+                try:
+                    cleaned_data[key] = str(value)
+                except:
+                    continue
+        
+        # 필수 필드 확인
+        required_fields = ['investment_number', 'purchase_date', 'exchange_rate', 'purchase_krw', 'exchange_name']
+        if not all(key in cleaned_data for key in required_fields):
+            missing = [key for key in required_fields if key not in cleaned_data]
+            print(f"Error: 필수 필드가 누락되었습니다: {missing}")
+            return False
+        
+        supabase.table('jpy_investments').insert(cleaned_data).execute()
         return True
     except Exception as e:
+        import traceback
         print(f"데이터 저장 실패: {e}")
+        print(f"데이터: {investment_data}")
+        print(f"Traceback: {traceback.format_exc()}")
         return False
 
 
@@ -54,10 +90,42 @@ def save_jpy_sell_record(sell_data: Dict) -> bool:
         return False
     
     try:
-        supabase.table('jpy_sell_records').insert(sell_data).execute()
+        # 데이터 정리: None 값, NaN 값, 잘못된 타입 처리
+        cleaned_data = {}
+        for key, value in sell_data.items():
+            if value is None:
+                # None 값은 제외 (선택적 필드인 경우)
+                if key not in ['memo', 'exchange_name']:  # 선택적 필드는 제외 가능
+                    continue
+            elif isinstance(value, float):
+                # NaN 체크
+                import math
+                if math.isnan(value) or math.isinf(value):
+                    continue
+                cleaned_data[key] = value
+            elif isinstance(value, (int, str, bool)):
+                cleaned_data[key] = value
+            elif hasattr(value, 'isoformat'):  # datetime 객체
+                cleaned_data[key] = value.isoformat()
+            else:
+                # 다른 타입은 문자열로 변환
+                try:
+                    cleaned_data[key] = str(value)
+                except:
+                    continue
+        
+        # 필수 필드 확인
+        if not cleaned_data:
+            print("Error: 저장할 데이터가 없습니다.")
+            return False
+        
+        supabase.table('jpy_sell_records').insert(cleaned_data).execute()
         return True
     except Exception as e:
+        import traceback
         print(f"매도 기록 저장 실패: {e}")
+        print(f"데이터: {sell_data}")
+        print(f"Traceback: {traceback.format_exc()}")
         return False
 
 

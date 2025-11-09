@@ -2,10 +2,20 @@
 애플리케이션 설정 및 상수
 """
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-# 환경 변수 로드
-load_dotenv()
+# 프로젝트 루트 디렉토리 찾기
+# 이 파일(config/settings.py)의 위치에서 상위 디렉토리가 프로젝트 루트
+PROJECT_ROOT = Path(__file__).parent.parent
+
+# 환경 변수 로드 (프로젝트 루트의 .env 파일 사용)
+env_path = PROJECT_ROOT / ".env"
+load_dotenv(dotenv_path=env_path)
+
+# 환경 변수가 로드되지 않았으면 backend 폴더의 .env도 시도
+if not os.getenv("SUPABASE_URL") and (PROJECT_ROOT / "backend" / ".env").exists():
+    load_dotenv(dotenv_path=PROJECT_ROOT / "backend" / ".env")
 
 # Supabase 설정
 SUPABASE_URL = os.getenv("SUPABASE_URL")
