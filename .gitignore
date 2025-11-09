@@ -49,11 +49,12 @@ app_new.py
 app_backup.py
 components/
 pages/
-utils/formatters.py
+utils/
 requirements.txt
 *.sql
 *_README.md
 README_*.md
+README_개선사항.md
 DB_CACHE_README.md
 STATUS.md
 QUICK_FIX.md
@@ -63,6 +64,7 @@ SUPABASE_FALLBACK.md
 GITHUB_SETUP.md
 README_REACT.md
 .streamlit/
+.devcontainer/
 
 # Node.js / Frontend
 node_modules/
