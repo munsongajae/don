@@ -1,104 +1,124 @@
 # 달러/엔화 투자 관리 앱
 
-Streamlit과 Supabase를 사용한 환율 투자 관리 웹 애플리케이션입니다.
+Streamlit 기반의 투자 관리 애플리케이션을 React + FastAPI로 마이그레이션한 프로젝트입니다.
 
-## 주요 기능
+## 🚀 기술 스택
 
-- 실시간 환율 정보 (인베스팅닷컴, 야후파이낸스, 하나은행)
-- 달러/엔화 투자 포트폴리오 관리
-- 투자 기록 및 매도 기록 관리
-- 기간별 성과 분석
-- 김치프리미엄 계산
+### Frontend
+- **React** + **TypeScript**
+- **Vite** (빌드 도구)
+- **Tailwind CSS** (스타일링)
+- **Zustand** (상태 관리)
+- **Axios** (API 클라이언트)
+- **Recharts** (차트 라이브러리)
 
-## 설치 및 설정
+### Backend
+- **FastAPI** (Python 웹 프레임워크)
+- **Pandas** (데이터 처리)
+- **yfinance** (환율 데이터)
+- **Supabase** (데이터베이스)
 
-### 1. 의존성 설치
+## 📁 프로젝트 구조
+
+```
+dollar/
+├── frontend/          # React 프론트엔드
+│   ├── src/
+│   │   ├── components/    # 재사용 가능한 컴포넌트
+│   │   ├── pages/         # 페이지 컴포넌트
+│   │   ├── store/         # Zustand 스토어
+│   │   └── utils/         # 유틸리티 함수
+│   └── package.json
+├── backend/           # FastAPI 백엔드
+│   ├── main.py        # FastAPI 앱
+│   ├── run.py         # 서버 실행 스크립트
+│   └── requirements.txt
+├── services/          # 비즈니스 로직
+├── database/          # 데이터베이스 관련
+└── config/            # 설정 파일
+```
+
+## 🛠️ 설치 및 실행
+
+### 1. 환경 변수 설정
+
+프로젝트 루트에 `.env` 파일을 생성하고 다음 내용을 추가하세요:
+
+```env
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 2. Backend 설정
 
 ```bash
+# 백엔드 디렉토리로 이동
+cd backend
+
+# 가상 환경 생성 (선택사항)
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# 의존성 설치
 pip install -r requirements.txt
+
+# 서버 실행
+python run.py
 ```
 
-### 2. Supabase 설정
+백엔드 서버는 `http://localhost:8000`에서 실행됩니다.
 
-1. [Supabase](https://supabase.com)에서 새 프로젝트 생성
-2. SQL Editor에서 `supabase_schema.sql` 파일의 내용 실행
-3. 프로젝트 설정에서 URL과 Anon Key 복사
-
-### 3. 환경변수 설정
-
-`env_example.txt` 파일을 참고하여 `.env` 파일 생성:
+### 3. Frontend 설정
 
 ```bash
-SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_ANON_KEY=your-anon-key-here
+# 프론트엔드 디렉토리로 이동
+cd frontend
+
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
+npm run dev
 ```
 
-### 4. 애플리케이션 실행
+프론트엔드 서버는 `http://localhost:3000`에서 실행됩니다.
 
-```bash
-streamlit run app.py
-```
+## 📋 주요 기능
 
-## 데이터베이스 스키마
+### 1. 요약 탭 (Summary)
+- 실시간 환율 정보
+- 달러/엔화 투자 지표 (1개월, 3개월, 6개월, 1년)
+- 매수 신호 표시 (O/X)
 
-### 달러 투자 테이블 (dollar_investments)
-- id: UUID (Primary Key)
-- investment_number: 투자 번호
-- purchase_date: 매수일시
-- exchange_rate: 매수 환율
-- usd_amount: 매수 달러 금액
-- exchange_name: 거래소명
-- memo: 메모
-- purchase_krw: 매수금액 (KRW)
+### 2. 분석 탭 (Analysis)
+- 달러지수 (DXY) 차트
+- 달러환율 (USD/KRW) 차트
+- 엔화지수 (JXY) 차트
+- 엔화환율 (JPY/KRW) 차트
+- 기간별 분석 (1개월, 3개월, 6개월, 1년)
 
-### 달러 매도 기록 테이블 (dollar_sell_records)
-- id: UUID (Primary Key)
-- investment_number: 투자 번호
-- sell_date: 매도일시
-- sell_rate: 매도 환율
-- sell_amount: 매도 금액
-- sell_krw: 매도금액 (KRW)
-- profit_krw: 확정손익
-- profit_rate: 수익률
+### 3. 투자 탭 (Investment)
+- 달러/엔화 투자 등록
+- 투자 목록 조회
+- 포트폴리오 성과 분석
+- 투자 매도 기능
 
-### 엔화 투자 테이블 (jpy_investments)
-- 달러 투자 테이블과 동일한 구조 (usd_amount → jpy_amount)
+### 4. 매도 기록 탭 (Sell Records)
+- 매도 기록 조회
+- 기간별 필터링
+- 매도 현황판 (매수금액, 확정 손익, 수익률)
 
-### 엔화 매도 기록 테이블 (jpy_sell_records)
-- 달러 매도 기록 테이블과 동일한 구조
+## 🔧 환경 변수
 
-## 주요 기능 설명
+- `SUPABASE_URL`: Supabase 프로젝트 URL
+- `SUPABASE_ANON_KEY`: Supabase Anon Key (eyJ... 형식 권장)
 
-### 1. 실시간 환율
-- 인베스팅닷컴 USD/KRW, JPY/KRW
-- 하나은행 USD/KRW
-- 테더 USDT/KRW (Bithumb)
-- 김치프리미엄 계산
+## 📝 참고사항
 
-### 2. 투자 관리
-- 투자 추가/삭제
-- 전량 매도/분할 매도
-- 실시간 손익 계산
-- 기간별 성과 분석
+- Supabase 연결이 실패해도 yfinance에서 직접 데이터를 가져와 앱이 정상 작동합니다
+- 프론트엔드와 백엔드는 별도의 포트에서 실행됩니다 (Vite 프록시 사용)
+- 환경 변수는 `.env` 파일에 저장되며, Git에 업로드되지 않습니다
 
-### 3. 데이터 저장
-- Supabase PostgreSQL 데이터베이스
-- 세션 상태와 데이터베이스 동기화
-- 자동 백업 및 복원
+## 📄 라이선스
 
-## 문제 해결
-
-### Supabase 연결 오류
-- 환경변수 설정 확인
-- Supabase 프로젝트 상태 확인
-- 네트워크 연결 확인
-
-### 데이터 로드 실패
-- 데이터베이스 테이블 존재 확인
-- RLS 정책 설정 확인
-- API 키 권한 확인
-
-## 라이선스
-
-MIT License
-
+MIT
