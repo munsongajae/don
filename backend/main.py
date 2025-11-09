@@ -13,8 +13,22 @@ import numpy as np
 # 프로젝트 루트를 Python 경로에 추가
 import sys
 from pathlib import Path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
+# Render에서 rootDir이 backend로 설정되면 parent만 사용
+# 로컬에서는 parent.parent 사용
+try:
+    project_root = Path(__file__).parent.parent
+    # services 폴더가 있는지 확인
+    if (project_root / "services").exists():
+        sys.path.insert(0, str(project_root))
+    else:
+        # Render 환경: backend가 루트이므로 현재 디렉토리의 services 사용
+        # services는 backend와 같은 레벨이므로 parent로 이동
+        project_root = Path(__file__).parent.parent
+        sys.path.insert(0, str(project_root))
+except Exception:
+    # 폴백: 현재 디렉토리 기준
+    project_root = Path(__file__).parent.parent
+    sys.path.insert(0, str(project_root))
 
 from services.exchange_rate import (
     fetch_usdt_krw_price,
