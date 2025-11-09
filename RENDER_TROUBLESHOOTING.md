@@ -11,17 +11,23 @@
 1. **Python 버전 명시**
    - `backend/runtime.txt` 파일 생성
    - 내용: `python-3.11.7`
+   - `render.yaml`에 `pythonVersion: "3.11"` 추가
+   - 환경 변수 `PYTHON_VERSION=3.11.7` 추가
 
-2. **pip 업그레이드**
-   - `render.yaml`의 buildCommand에 `pip install --upgrade pip` 추가
-   - 또는 Render 대시보드에서 Build Command 수정:
+2. **빌드 도구 설치**
+   - `requirements.txt`에 `setuptools`와 `wheel` 추가
+   - `render.yaml`의 buildCommand에 빌드 도구 업그레이드 추가:
      ```
-     pip install --upgrade pip && pip install -r requirements.txt
+     pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements.txt
      ```
 
 3. **패키지 버전 호환성 확인**
    - `requirements.txt`에서 패키지 버전 범위 명시
    - 예: `numpy>=1.24.0,<2.0.0`
+
+4. **캐시 없이 설치**
+   - `--no-cache-dir` 옵션 사용하여 캐시 문제 방지
+   - 빌드 명령어: `pip install --no-cache-dir -r requirements.txt`
 
 ### 2. 빌드 명령어 오류
 
