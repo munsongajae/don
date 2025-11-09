@@ -43,7 +43,25 @@ Thumbs.db
 # Logs
 *.log
 
-# Streamlit
+# Streamlit (기존 앱 - React 앱만 업로드)
+app.py
+app_new.py
+app_backup.py
+components/
+pages/
+utils/formatters.py
+requirements.txt
+*.sql
+*_README.md
+README_*.md
+DB_CACHE_README.md
+STATUS.md
+QUICK_FIX.md
+FIX_SUPABASE_KEY.md
+ENV_SETUP.md
+SUPABASE_FALLBACK.md
+GITHUB_SETUP.md
+README_REACT.md
 .streamlit/
 
 # Node.js / Frontend
