@@ -8,8 +8,8 @@ uvicorn[standard]==0.24.0
 pydantic==2.5.0
 python-multipart==0.0.6
 
-# Data processing (numpy를 먼저 설치)
-numpy>=1.24.0,<2.0.0
+# Data processing (numpy를 먼저 설치, 호환성 개선)
+numpy==1.24.3
 pandas==2.1.3
 
 # Finance data
