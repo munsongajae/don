@@ -1,9 +1,26 @@
 import axios from 'axios';
 
-// Vite proxy를 사용하므로 baseURL은 빈 문자열로 설정
-// proxy가 /api로 시작하는 모든 요청을 백엔드로 전달합니다
+// 환경 변수에서 API URL 가져오기 (배포 환경에서 백엔드 URL)
+// 개발 환경: Vite proxy 사용 (빈 문자열)
+// 프로덕션 환경: 환경 변수에서 백엔드 URL 사용
+const getApiBaseUrl = () => {
+  // Vite 환경 변수 사용 (VITE_ 접두사 필요)
+  // Netlify에서 환경 변수로 설정한 백엔드 URL 사용
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // 개발 환경: Vite proxy 사용 (로컬 개발 시)
+  if (import.meta.env.DEV) {
+    return '';
+  }
+  // 프로덕션 환경에서 VITE_API_URL이 없으면 에러
+  // Netlify 환경 변수에 VITE_API_URL을 설정해야 합니다
+  console.warn('VITE_API_URL이 설정되지 않았습니다. Netlify 환경 변수를 확인해주세요.');
+  return '';
+};
+
 const apiClient = axios.create({
-  baseURL: '',
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },

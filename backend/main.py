@@ -43,9 +43,39 @@ from database.jpy_db import (
 app = FastAPI(title="환율 투자 관리 API")
 
 # CORS 설정
+# 환경 변수에서 허용할 오리진 가져오기 (배포 환경용)
+import os
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
+
+# 환경 변수에서 Netlify 도메인이 있으면 추가
+netlify_domain = os.getenv("NETLIFY_DOMAIN")
+if netlify_domain:
+    allowed_origins.append(netlify_domain)
+    # Netlify는 https를 사용하므로 https 버전도 추가
+    if not netlify_domain.startswith("https://"):
+        allowed_origins.append(f"https://{netlify_domain}")
+
+# 여러 Netlify 도메인을 쉼표로 구분하여 설정할 수 있음
+netlify_domains = os.getenv("NETLIFY_DOMAINS")
+if netlify_domains:
+    for domain in netlify_domains.split(","):
+        domain = domain.strip()
+        if domain:
+            allowed_origins.append(domain)
+            if not domain.startswith("https://"):
+                allowed_origins.append(f"https://{domain}")
+
+# 개발 환경에서는 모든 오리진 허용 (선택사항)
+# 프로덕션에서는 특정 도메인만 허용하는 것이 안전합니다
+if os.getenv("ENVIRONMENT") == "development":
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

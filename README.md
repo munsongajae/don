@@ -108,16 +108,47 @@ npm run dev
 - 기간별 필터링
 - 매도 현황판 (매수금액, 확정 손익, 수익률)
 
+## 🚀 배포
+
+### Netlify (Frontend) + Render/Railway (Backend)
+
+자세한 배포 방법은 다음 문서를 참조하세요:
+- [QUICK_DEPLOY.md](./QUICK_DEPLOY.md) - 빠른 배포 가이드 (5분)
+- [BACKEND_HOSTING.md](./BACKEND_HOSTING.md) - 백엔드 호스팅 플랫폼 비교
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - 상세한 배포 가이드
+- [NETLIFY_DEPLOY.md](./NETLIFY_DEPLOY.md) - Netlify 배포 상세 가이드
+
+**추천 배포 방법:**
+1. **백엔드**: Render (완전 무료) 또는 Railway ($5 크레딧/월)
+2. **프론트엔드**: Netlify (완전 무료)
+3. 환경 변수 설정 (`VITE_API_URL`)
+4. CORS 설정 업데이트
+
+**빠른 배포 (5분):**
+- [QUICK_DEPLOY.md](./QUICK_DEPLOY.md) 참조
+
 ## 🔧 환경 변수
 
+### 개발 환경
 - `SUPABASE_URL`: Supabase 프로젝트 URL
 - `SUPABASE_ANON_KEY`: Supabase Anon Key (eyJ... 형식 권장)
+
+### 배포 환경
+
+#### Frontend (Netlify)
+- `VITE_API_URL`: 백엔드 API URL
+
+#### Backend (Railway/Render)
+- `SUPABASE_URL`: Supabase 프로젝트 URL
+- `SUPABASE_ANON_KEY`: Supabase Anon Key
+- `NETLIFY_DOMAIN`: Netlify 도메인 (CORS용, 선택사항)
 
 ## 📝 참고사항
 
 - Supabase 연결이 실패해도 yfinance에서 직접 데이터를 가져와 앱이 정상 작동합니다
 - 프론트엔드와 백엔드는 별도의 포트에서 실행됩니다 (Vite 프록시 사용)
 - 환경 변수는 `.env` 파일에 저장되며, Git에 업로드되지 않습니다
+- 배포 시 백엔드와 프론트엔드를 별도로 배포해야 합니다
 
 ## 📄 라이선스
 

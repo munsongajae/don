@@ -94,6 +94,10 @@ backend/venv/
 backend/env/
 backend/ENV/
 
+# Deployment files (optional - can be committed)
+# railway.json
+# render.yaml
+
 
 
 
