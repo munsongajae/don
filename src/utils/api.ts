@@ -1,21 +1,14 @@
 import axios from 'axios';
 
-// 환경 변수에서 API URL 가져오기 (배포 환경에서 백엔드 URL)
-// 개발 환경: Vite proxy 사용 (빈 문자열)
-// 프로덕션 환경: 환경 변수에서 백엔드 URL 사용
+// Netlify Functions 사용 시 baseURL은 빈 문자열 (같은 도메인)
+// 개발 환경: Vite proxy 사용 (로컬 개발 시)
+// 프로덕션 환경: Netlify Functions가 자동으로 /api/* 경로를 라우팅
 const getApiBaseUrl = () => {
-  // Vite 환경 변수 사용 (VITE_ 접두사 필요)
-  // Netlify에서 환경 변수로 설정한 백엔드 URL 사용
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
   // 개발 환경: Vite proxy 사용 (로컬 개발 시)
   if (import.meta.env.DEV) {
     return '';
   }
-  // 프로덕션 환경에서 VITE_API_URL이 없으면 에러
-  // Netlify 환경 변수에 VITE_API_URL을 설정해야 합니다
-  console.warn('VITE_API_URL이 설정되지 않았습니다. Netlify 환경 변수를 확인해주세요.');
+  // 프로덕션 환경: Netlify Functions 사용 (같은 도메인)
   return '';
 };
 
@@ -71,8 +64,17 @@ export const exchangeRateApi = {
   getCurrentRates: () => apiClient.get('/api/exchange-rates/current'),
   
   // 기간별 데이터
-  getPeriodData: (periodMonths: number) => 
-    apiClient.get(`/api/exchange-rates/period/${periodMonths}`),
+  // 주의: 기간별 데이터는 실행 시간 제한으로 인해 Functions로 구현하지 않았습니다.
+  // 백엔드 URL이 있으면 백엔드 사용, 없으면 Functions 사용 (에러 가능)
+  getPeriodData: (periodMonths: number) => {
+    // 백엔드 URL이 있으면 백엔드 사용
+    const backendUrl = import.meta.env.VITE_API_URL;
+    if (backendUrl) {
+      return axios.get(`${backendUrl}/api/exchange-rates/period/${periodMonths}`);
+    }
+    // 없으면 Functions 사용 (현재는 구현되지 않음)
+    return apiClient.get(`/api/exchange-rates/period/${periodMonths}`);
+  },
   
   // USDT/KRW
   getUsdtKrw: () => apiClient.get('/api/exchange-rates/usdt-krw'),

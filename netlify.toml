@@ -10,6 +10,17 @@
   # Node.js 버전
   NODE_VERSION = "18"
 
+# Functions 설정
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# API 리다이렉트 (Functions로 라우팅)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
 # 리다이렉트 설정 (SPA 라우팅 지원)
 [[redirects]]
   from = "/*"

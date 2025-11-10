@@ -40,7 +40,6 @@ export const Indicator = ({
   if (hideHighLow) {
     // 중간값을 50% 위치에 고정하고, 현재값의 상대적 위치 계산
     // 현재값이 중간값보다 작으면 0-50% 사이, 크면 50-100% 사이
-    const range = Math.max(Math.abs(midValue - lowValue), Math.abs(highValue - midValue), 1);
     if (currentValue <= midValue) {
       // 중간값 이하: 0-50% 사이
       const ratio = lowValue !== midValue ? (currentValue - lowValue) / (midValue - lowValue) : 0.5;

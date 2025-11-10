@@ -328,19 +328,19 @@ export const AnalysisTab = () => {
         <>
           <Indicator
             title="💵 달러지수 (DXY)"
-            currentValue={analysisData.dxy.current}
-            highValue={analysisData.dxy.high}
-            lowValue={analysisData.dxy.low}
-            midValue={analysisData.dxy.mid}
+            currentValue={analysisData.dxy?.current || 0}
+            highValue={analysisData.dxy?.high || 0}
+            lowValue={analysisData.dxy?.low || 0}
+            midValue={analysisData.dxy?.mid || 0}
             reverseLogic={true}
           />
 
           <Indicator
             title="💵 달러환율 (USD/KRW)"
-            currentValue={analysisData.usdKrw.current}
-            highValue={analysisData.usdKrw.high}
-            lowValue={analysisData.usdKrw.low}
-            midValue={analysisData.usdKrw.mid}
+            currentValue={analysisData.usdKrw?.current || 0}
+            highValue={analysisData.usdKrw?.high || 0}
+            lowValue={analysisData.usdKrw?.low || 0}
+            midValue={analysisData.usdKrw?.mid || 0}
             unit="원"
             reverseLogic={true}
           />
@@ -371,10 +371,10 @@ export const AnalysisTab = () => {
             <Chart
               title={`💵 달러 인덱스 (DXY) ${period === 12 ? '1년' : `${period}개월`} 차트`}
               data={chartData.dxy}
-              currentValue={analysisData.dxy.current}
-              highValue={analysisData.dxy.high}
-              lowValue={analysisData.dxy.low}
-              midValue={analysisData.dxy.mid}
+              currentValue={analysisData.dxy?.current || 0}
+              highValue={analysisData.dxy?.high || 0}
+              lowValue={analysisData.dxy?.low || 0}
+              midValue={analysisData.dxy?.mid || 0}
               yAxisLabel="DXY"
             />
           )}
@@ -383,10 +383,10 @@ export const AnalysisTab = () => {
             <Chart
               title={`💵 달러환율 (USD/KRW) ${period === 12 ? '1년' : `${period}개월`} 차트`}
               data={chartData.usdKrw}
-              currentValue={analysisData.usdKrw.current}
-              highValue={analysisData.usdKrw.high}
-              lowValue={analysisData.usdKrw.low}
-              midValue={analysisData.usdKrw.mid}
+              currentValue={analysisData.usdKrw?.current || 0}
+              highValue={analysisData.usdKrw?.high || 0}
+              lowValue={analysisData.usdKrw?.low || 0}
+              midValue={analysisData.usdKrw?.mid || 0}
               yAxisLabel="원"
             />
           )}
@@ -395,19 +395,19 @@ export const AnalysisTab = () => {
         <>
           <Indicator
             title="💴 엔화지수 (JXY)"
-            currentValue={analysisData.jxy.current}
-            highValue={analysisData.jxy.high}
-            lowValue={analysisData.jxy.low}
-            midValue={analysisData.jxy.mid}
+            currentValue={analysisData.jxy?.current || 0}
+            highValue={analysisData.jxy?.high || 0}
+            lowValue={analysisData.jxy?.low || 0}
+            midValue={analysisData.jxy?.mid || 0}
             reverseLogic={true}
           />
 
           <Indicator
             title="💴 엔화환율 (JPY/KRW, 100엔당)"
-            currentValue={analysisData.jpyKrw.current * 100}
-            highValue={analysisData.jpyKrw.high * 100}
-            lowValue={analysisData.jpyKrw.low * 100}
-            midValue={analysisData.jpyKrw.mid * 100}
+            currentValue={(analysisData.jpyKrw?.current || 0) * 100}
+            highValue={(analysisData.jpyKrw?.high || 0) * 100}
+            lowValue={(analysisData.jpyKrw?.low || 0) * 100}
+            midValue={(analysisData.jpyKrw?.mid || 0) * 100}
             unit="원"
             reverseLogic={true}
           />
@@ -438,10 +438,10 @@ export const AnalysisTab = () => {
             <Chart
               title={`💴 엔화환율 (JPY/KRW, 100엔당) ${period === 12 ? '1년' : `${period}개월`} 차트`}
               data={chartData.jpyKrw}
-              currentValue={analysisData.fairRate.current}
-              highValue={analysisData.jpyKrw.high * 100}
-              lowValue={analysisData.jpyKrw.low * 100}
-              midValue={analysisData.jpyKrw.mid * 100}
+              currentValue={analysisData.fairRate?.current || 0}
+              highValue={(analysisData.jpyKrw?.high || 0) * 100}
+              lowValue={(analysisData.jpyKrw?.low || 0) * 100}
+              midValue={(analysisData.jpyKrw?.mid || 0) * 100}
               yAxisLabel="원"
               yAxisDecimals={4}
             />

@@ -34,7 +34,6 @@ export const Chart = ({
   highValue,
   lowValue,
   midValue,
-  yAxisLabel = '값',
   yAxisDecimals,
 }: ChartProps) => {
   // 실제 데이터의 최소/최대값 계산

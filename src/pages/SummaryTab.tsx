@@ -3,7 +3,6 @@ import { useExchangeRateStore } from '@/store/useExchangeRateStore';
 import { MetricCard } from '@/components/MetricCard';
 import { Card } from '@/components/Card';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { ErrorMessage } from '@/components/ErrorMessage';
 import { formatCurrency, formatPercentage } from '@/utils/formatters';
 import { calculateIndicatorSignals } from '@/utils/calculations';
 import { calculateCurrentDxy, calculateDollarIndexSeries } from '@/utils/calculations';
@@ -17,7 +16,7 @@ const PERIOD_NAMES: Record<number, string> = {
 };
 
 export const SummaryTab = () => {
-  const { currentRates, fetchCurrentRates, fetchPeriodData, periodData } = useExchangeRateStore();
+  const { currentRates, fetchCurrentRates, fetchPeriodData } = useExchangeRateStore();
   const [allSignals, setAllSignals] = useState<Record<number, any>>({});
   const [loading, setLoading] = useState(false);
 
@@ -179,7 +178,6 @@ export const SummaryTab = () => {
         const dxy52wLow = Math.min(...dxySeries);
         const dxy52wMid = (dxy52wHigh + dxy52wLow) / 2;
 
-        const usdKrwClose = data.dfClose.USD_KRW || [];
         const usdKrwHigh = data.dfHigh.USD_KRW || [];
         const usdKrwLow = data.dfLow.USD_KRW || [];
         const currentUsdKrw = currentRates?.investingUsd || data.currentRates?.USD_KRW || 0;
@@ -189,12 +187,10 @@ export const SummaryTab = () => {
         const usdKrw52wMid = (usdKrw52wHigh + usdKrw52wLow) / 2;
 
         // 엔화 지표 계산 (0 값 필터링)
-        const usdJpyClose = (data.dfClose.USD_JPY || []).filter((rate: number) => rate && rate > 0);
         const usdJpyHigh = (data.dfHigh.USD_JPY || []).filter((rate: number) => rate && rate > 0);
         const usdJpyLow = (data.dfLow.USD_JPY || []).filter((rate: number) => rate && rate > 0);
 
         // 0 값을 필터링한 후 계산
-        const jxyClose = usdJpyClose.map((rate: number) => 100 / rate).filter((val: number) => val && val > 0);
         const jxyHigh = usdJpyLow.map((rate: number) => 100 / rate).filter((val: number) => val && val > 0);
         const jxyLow = usdJpyHigh.map((rate: number) => 100 / rate).filter((val: number) => val && val > 0);
 
@@ -226,7 +222,6 @@ export const SummaryTab = () => {
         const jxy52wMid = (jxy52wHigh + jxy52wLow) / 2;
 
         // JPY/KRW 데이터 필터링 (0 값 제거)
-        const jpyKrwClose = (data.dfClose.JPY_KRW || []).filter((rate: number) => rate && rate > 0);
         const jpyKrwHigh = (data.dfHigh.JPY_KRW || []).filter((rate: number) => rate && rate > 0);
         const jpyKrwLow = (data.dfLow.JPY_KRW || []).filter((rate: number) => rate && rate > 0);
         
