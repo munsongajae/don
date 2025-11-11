@@ -55,6 +55,14 @@ __pycache__/
 *.pyd
 .Python
 
+# 이전 React/Vite 앱 파일 제외
+src/
+netlify/functions/
+vite.config.ts
+tailwind.config.js
+tsconfig.node.json
+index.html
+
 # IDE
 .idea/
 .devcontainer/
