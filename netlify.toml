@@ -1,40 +1,15 @@
-# Netlify 배포 설정 파일
-
 [build]
-  # 빌드 디렉토리 (프론트엔드)
-  base = "frontend"
-  # 빌드 명령어
   command = "npm run build"
-  # 빌드 출력 디렉토리
-  publish = "frontend/dist"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
 [build.environment]
-  # Node.js 버전
   NODE_VERSION = "18"
 
-# 리다이렉트 설정 (SPA 라우팅 지원)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# API 프록시 설정 (백엔드 API 요청 프록시)
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
-
-# 헤더 설정 (보안)
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-
-[[headers]]
-  for = "/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+# 서버리스 함수 설정 (API Routes)
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["**/*.ts", "**/*.tsx"]
 

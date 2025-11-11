@@ -1,112 +1,65 @@
-# Environment variables
-.env
-.env.local
-.env.production
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
 
-# Virtual environments
-venv/
-env/
-ENV/
+# testing
+/coverage
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
+# next.js
+/.next/
+/out/
 
-# OS
+# production
+/build
+
+# misc
 .DS_Store
-Thumbs.db
+*.pem
 
-# Logs
-*.log
-
-# Streamlit (기존 앱 - React 앱만 업로드)
-app.py
-app_new.py
-app_backup.py
-components/
-pages/
-utils/
-requirements.txt
-*.sql
-*_README.md
-README_*.md
-README_개선사항.md
-DB_CACHE_README.md
-STATUS.md
-QUICK_FIX.md
-FIX_SUPABASE_KEY.md
-ENV_SETUP.md
-SUPABASE_FALLBACK.md
-GITHUB_SETUP.md
-README_REACT.md
-.streamlit/
-.devcontainer/
-
-# Node.js / Frontend
-node_modules/
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
-dist/
-build/
-.cache/
 
-# Frontend build outputs
-frontend/dist/
-frontend/build/
-frontend/.vite/
+# local env files
+.env*.local
+.env
 
-# Backend
-backend/__pycache__/
-backend/*.pyc
-backend/.pytest_cache/
-backend/.coverage
-backend/htmlcov/
-backend/.env
+# vercel
+.vercel
 
-# Python virtual environment (backend specific)
-backend/venv/
-backend/env/
-backend/ENV/
+# typescript
+*.tsbuildinfo
+next-env.d.ts
 
-# Deployment files (optional - can be committed)
-# railway.json
-# render.yaml
+# Streamlit 관련 파일 제외
+app.py
+components/*.py
+components/__pycache__/
+config/
+database/*.py
+database/__pycache__/
+services/*.py
+services/__pycache__/
+utils/*.py
+utils/__pycache__/
+pages/
+requirements.txt
+.streamlit/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
 
+# IDE
+.idea/
+.devcontainer/
+.vscode/
 
-
-
-
-
-
-
-
-
-
-
-
+# SQL 파일 (선택적 - 필요시 주석 해제)
+# supabase_schema.sql
+# add_sell_records_columns.sql
