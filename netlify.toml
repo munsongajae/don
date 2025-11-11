@@ -8,8 +8,3 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# 서버리스 함수 설정 (API Routes)
-[functions]
-  node_bundler = "esbuild"
-  included_files = ["**/*.ts", "**/*.tsx"]
-
