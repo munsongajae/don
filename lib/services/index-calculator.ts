@@ -1,9 +1,22 @@
-import yahooFinance from 'yahoo-finance2';
 import { DXY_INITIAL_CONSTANT, DXY_WEIGHTS, DXY_TICKERS, USD_KRW_TICKER, PERIOD_MAP } from '@/lib/config/constants';
 import { PeriodData } from '@/types';
 
-// yahoo-finance2 인스턴스 생성 (생성자 함수 사용)
-const yf = new yahooFinance();
+// yahoo-finance2는 서버 사이드에서만 동적으로 import
+let yahooFinance: any = null;
+let yf: any = null;
+
+async function getYahooFinance() {
+  if (!yahooFinance) {
+    // 서버 사이드에서만 동적으로 import
+    if (typeof window === 'undefined') {
+      yahooFinance = (await import('yahoo-finance2')).default;
+      yf = new yahooFinance();
+    } else {
+      throw new Error('yahoo-finance2는 서버 사이드에서만 사용할 수 있습니다.');
+    }
+  }
+  return yf;
+}
 
 /**
  * yahoo-finance2를 사용하여 지정된 기간의 OHLC 데이터를 가져옵니다.
@@ -26,12 +39,15 @@ export async function fetchPeriodData(periodMonths: number = 12): Promise<Period
   // 각 티커별로 데이터 가져오기 (병렬 처리)
   const tickerData: Record<string, any[]> = {};
   
+  // yahoo-finance2 인스턴스 가져오기 (동적 import)
+  const yfInstance = await getYahooFinance();
+  
   // yahoo-finance2 인스턴스의 historical 메서드 사용
   await Promise.allSettled(
     allTickers.map(async (ticker) => {
       try {
         // historical 모듈 사용 (원본 Python의 yf.download()와 유사)
-        const quotes = await yf.historical(ticker, {
+        const quotes = await yfInstance.historical(ticker, {
           period1: startDate, // Date 객체 또는 ISO 문자열
           period2: endDate,
           interval: '1d' as const, // 일별 데이터
@@ -196,7 +212,8 @@ export async function fetchPeriodData(periodMonths: number = 12): Promise<Period
       allTickers.map(async (ticker) => {
         try {
           console.log(`티커 ${ticker} quote 조회 시작...`);
-          const quote = await yf.quote(ticker);
+          const yfInstance = await getYahooFinance();
+          const quote = await yfInstance.quote(ticker);
           const key = tickerToKey[ticker] || ticker;
           
           console.log(`티커 ${ticker} quote 응답:`, JSON.stringify(quote, null, 2).substring(0, 500));
