@@ -1,23 +1,9 @@
 import yahooFinance from 'yahoo-finance2';
 import { DXY_INITIAL_CONSTANT, DXY_WEIGHTS, DXY_TICKERS, USD_KRW_TICKER, PERIOD_MAP } from '@/lib/config/constants';
+import { PeriodData } from '@/types';
 
 // yahoo-finance2 인스턴스 생성 (생성자 함수 사용)
 const yf = new yahooFinance();
-
-export interface PeriodData {
-  close: Record<string, number[]>;
-  high: Record<string, number[]>;
-  low: Record<string, number[]>;
-  dates: string[];
-  currentRates: {
-    investingUsd: number;
-    hanaRate: number;
-    usdtKrw: number;
-    investingJpy: number;
-  };
-  // 원본과 동일: 각 통화 쌍의 현재 가격 (DXY 계산용)
-  currentPrices?: Record<string, number>;
-}
 
 /**
  * yahoo-finance2를 사용하여 지정된 기간의 OHLC 데이터를 가져옵니다.

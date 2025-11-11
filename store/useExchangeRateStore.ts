@@ -1,19 +1,5 @@
 import { create } from 'zustand';
-
-interface ExchangeRate {
-  investingUsd: number;
-  hanaRate: number;
-  usdtKrw: number;
-  investingJpy: number;
-}
-
-interface PeriodData {
-  close: Record<string, number[]>;
-  high: Record<string, number[]>;
-  low: Record<string, number[]>;
-  dates: string[];
-  currentRates: ExchangeRate;
-}
+import { PeriodData, ExchangeRate } from '@/types';
 
 interface ExchangeRateStore {
   currentRates: ExchangeRate | null;
