@@ -21,7 +21,7 @@ export default function TabsLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       <TossTabs tabs={tabs} activeTab={activeTab} />
-      <main className="max-w-2xl mx-auto px-4 py-6">
+      <main className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {children}
       </main>
     </div>

@@ -246,27 +246,27 @@ export default function AnalysisPage() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">분석</h1>
+    <div className="space-y-4 sm:space-y-6 animate-fade-in pb-6">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">분석</h1>
 
       {/* 통화 선택 */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-3 sm:gap-4 mb-4 sm:mb-6">
         <button
           onClick={() => setCurrency('dollar')}
-          className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+          className={`flex-1 px-4 py-3.5 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all touch-manipulation min-h-[48px] ${
             currency === 'dollar'
-              ? 'bg-toss-blue-500 text-white shadow-lg'
-              : 'bg-white text-gray-700 border border-gray-300'
+              ? 'bg-toss-blue-500 text-white shadow-lg scale-100'
+              : 'bg-white text-gray-700 border border-gray-300 active:scale-95'
           }`}
         >
           💵 달러
         </button>
         <button
           onClick={() => setCurrency('jpy')}
-          className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+          className={`flex-1 px-4 py-3.5 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all touch-manipulation min-h-[48px] ${
             currency === 'jpy'
-              ? 'bg-toss-blue-500 text-white shadow-lg'
-              : 'bg-white text-gray-700 border border-gray-300'
+              ? 'bg-toss-blue-500 text-white shadow-lg scale-100'
+              : 'bg-white text-gray-700 border border-gray-300 active:scale-95'
           }`}
         >
           💴 엔화
@@ -274,15 +274,15 @@ export default function AnalysisPage() {
       </div>
 
       {/* 기간 선택 */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-6 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
         {[1, 3, 6, 12].map((p) => (
           <button
             key={p}
             onClick={() => setPeriod(p)}
-            className={`px-4 py-2 rounded-xl font-medium transition-all ${
+            className={`px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl font-medium text-sm sm:text-base transition-all touch-manipulation whitespace-nowrap min-h-[44px] flex-shrink-0 ${
               period === p
-                ? 'bg-toss-blue-500 text-white'
-                : 'bg-white text-gray-700 border border-gray-300'
+                ? 'bg-toss-blue-500 text-white shadow-md'
+                : 'bg-white text-gray-700 border border-gray-300 active:scale-95'
             }`}
           >
             {p === 12 ? '1년' : `${p}개월`}

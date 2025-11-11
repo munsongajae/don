@@ -21,15 +21,15 @@ export default function TossCard({
   return (
     <div
       className={clsx(
-        'bg-white rounded-2xl transition-all duration-200',
+        'bg-white rounded-xl sm:rounded-2xl transition-all duration-200',
         {
-          'p-4': padding === 'sm',
-          'p-6': padding === 'md',
-          'p-8': padding === 'lg',
+          'p-3 sm:p-4': padding === 'sm',
+          'p-4 sm:p-6': padding === 'md',
+          'p-6 sm:p-8': padding === 'lg',
           'shadow-sm': shadow === 'sm',
           'shadow-md': shadow === 'md',
           'shadow-lg': shadow === 'lg',
-          'cursor-pointer hover:shadow-lg hover:-translate-y-0.5': onClick,
+          'cursor-pointer hover:shadow-lg hover:-translate-y-0.5 active:scale-95': onClick,
         },
         className
       )}
