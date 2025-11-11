@@ -39,7 +39,8 @@ next-env.d.ts
 app.py
 components/*.py
 components/__pycache__/
-config/
+config/__pycache__/
+config/*.py
 database/*.py
 database/__pycache__/
 services/*.py
@@ -54,6 +55,9 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+
+# Streamlit config 폴더는 제외하되, Next.js lib/config는 포함
+!/lib/config/
 
 # 이전 React/Vite 앱 파일 제외
 src/
