@@ -350,7 +350,7 @@ export default function AnalysisPage() {
               data={analysisData.dates.map((date: string, i: number) => ({
                 date,
                 value: analysisData.dxy.series[i] || 0,
-              })).filter(item => item.value > 0)}
+              })).filter((item: { date: string; value: number }) => item.value > 0)}
               currentValue={analysisData.dxy.current}
               highValue={analysisData.dxy.high}
               lowValue={analysisData.dxy.low}
@@ -366,7 +366,7 @@ export default function AnalysisPage() {
               data={analysisData.dates.map((date: string, i: number) => ({
                 date,
                 value: analysisData.usdKrw.series[i] || 0,
-              })).filter(item => item.value > 0)}
+              })).filter((item: { date: string; value: number }) => item.value > 0)}
               currentValue={analysisData.usdKrw.current}
               highValue={analysisData.usdKrw.high}
               lowValue={analysisData.usdKrw.low}
@@ -436,7 +436,7 @@ export default function AnalysisPage() {
               data={analysisData.dates.map((date: string, i: number) => ({
                 date,
                 value: analysisData.jxy.series[i] || 0,
-              })).filter(item => item.value > 0)}
+              })).filter((item: { date: string; value: number }) => item.value > 0)}
               currentValue={analysisData.jxy.current}
               highValue={analysisData.jxy.high}
               lowValue={analysisData.jxy.low}
@@ -452,7 +452,7 @@ export default function AnalysisPage() {
               data={analysisData.dates.map((date: string, i: number) => ({
                 date,
                 value: analysisData.jpyKrw.series[i] || 0,
-              })).filter(item => item.value > 0)}
+              })).filter((item: { date: string; value: number }) => item.value > 0)}
               currentValue={analysisData.jpyKrw.current}
               highValue={analysisData.jpyKrw.high}
               lowValue={analysisData.jpyKrw.low}
