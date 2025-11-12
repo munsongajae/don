@@ -23,6 +23,8 @@ export interface DollarInvestment {
   usd_amount: number;
   purchase_krw: number;
   exchange_rate: number;
+  exchange_name?: string;
+  investment_number?: number;
   created_at: string;
 }
 
@@ -32,6 +34,8 @@ export interface JpyInvestment {
   jpy_amount: number;
   purchase_krw: number;
   exchange_rate: number;
+  exchange_name?: string;
+  investment_number?: number;
   created_at: string;
 }
 
@@ -45,6 +49,7 @@ export interface DollarSellRecord {
   exchange_rate: number;
   profit_loss: number;
   profit_rate: number;
+  sell_number?: number;
   created_at: string;
 }
 
@@ -57,6 +62,7 @@ export interface JpySellRecord {
   exchange_rate: number;
   profit_loss: number;
   profit_rate: number;
+  sell_number?: number;
   created_at: string;
 }
 

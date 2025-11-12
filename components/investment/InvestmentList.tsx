@@ -34,6 +34,15 @@ export default function InvestmentList({
 
   const calculateProfit = (investment: DollarInvestment | JpyInvestment) => {
     const currentValue = calculateCurrentValue(investment);
+    // 매도 기록 반영: 원본 매수 금액에서 남은 금액 비율만큼만 계산
+    // investment는 이미 남은 금액으로 업데이트된 상태이므로,
+    // 원본 매수 금액 비율을 계산해야 함
+    const currentAmount = currency === 'dollar' 
+      ? (investment as DollarInvestment).usd_amount
+      : (investment as JpyInvestment).jpy_amount;
+    
+    // 원본 금액을 알 수 없으므로, purchase_krw를 그대로 사용
+    // (이미 투자 목록에서 남은 금액으로 필터링되었으므로)
     return currentValue - investment.purchase_krw;
   };
 
@@ -63,9 +72,16 @@ export default function InvestmentList({
           <TossCard key={investment.id}>
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h4 className="font-semibold text-gray-900">
-                  {formatDate(investment.purchase_date)}
-                </h4>
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="font-semibold text-gray-900">
+                    {formatDate(investment.purchase_date)}
+                  </h4>
+                  {(investment as any).investment_number && (
+                    <span className="text-xs bg-toss-blue-100 text-toss-blue-700 px-2 py-1 rounded-full font-medium">
+                      #{((investment as any).investment_number)}
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-gray-500 mt-1">
                   {currency === 'dollar'
                     ? `$${(investment as DollarInvestment).usd_amount.toLocaleString()}`

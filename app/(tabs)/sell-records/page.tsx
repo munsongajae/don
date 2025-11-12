@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useInvestmentStore } from '@/store/useInvestmentStore';
+import ConditionalAuthGuard from '@/components/auth/ConditionalAuthGuard';
 import TossCard from '@/components/ui/TossCard';
 import MetricCard from '@/components/metrics/MetricCard';
 import { formatKrw, formatPercentage, formatDate } from '@/lib/utils/formatters';
 import { DollarSellRecord, JpySellRecord } from '@/types';
 
-export default function SellRecordsPage() {
+function SellRecordsPageContent() {
   const [currency, setCurrency] = useState<'dollar' | 'jpy'>('dollar');
   const [period, setPeriod] = useState<'all' | 1 | 3 | 12>('all');
   
@@ -169,9 +170,16 @@ export default function SellRecordsPage() {
               <TossCard key={record.id}>
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h4 className="font-semibold text-gray-900">
-                      {formatDate(record.sell_date)}
-                    </h4>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-gray-900">
+                        {formatDate(record.sell_date)}
+                      </h4>
+                      {(record as any).sell_number && (
+                        <span className="text-xs bg-toss-blue-100 text-toss-blue-700 px-2 py-1 rounded-full font-medium">
+                          #{((record as any).sell_number)}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-500 mt-1">
                       {currency === 'dollar' ? (
                         <>
@@ -234,5 +242,16 @@ export default function SellRecordsPage() {
         <div className="text-center text-gray-500 py-8">로딩 중...</div>
       )}
     </div>
+  );
+}
+
+export default function SellRecordsPage() {
+  return (
+    <ConditionalAuthGuard
+      title="매도 기록을 확인하려면 로그인이 필요합니다"
+      description="로그인하면 매도 기록을 저장하고 관리할 수 있습니다."
+    >
+      <SellRecordsPageContent />
+    </ConditionalAuthGuard>
   );
 }

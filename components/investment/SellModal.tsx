@@ -16,6 +16,7 @@ interface SellModalProps {
     sellKrw: number;
     exchangeRate: number;
     sellDate: string;
+    sellNumber?: number;
   }) => Promise<void>;
   onClose: () => void;
 }
@@ -36,6 +37,7 @@ export default function SellModal({
   const [sellDate, setSellDate] = useState(
     new Date().toISOString().split('T')[0]
   );
+  const [sellNumber, setSellNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const maxAmount =
@@ -64,7 +66,10 @@ export default function SellModal({
       return;
     }
 
-    const sellKrw = amountNum * rateNum;
+    // 엔화의 경우 환율이 100엔당 원화이므로 계산 방식이 다름
+    const sellKrw = currency === 'jpy'
+      ? (amountNum * rateNum) / 100  // JPY: (엔화금액 * 100엔당환율) / 100
+      : amountNum * rateNum;         // USD: 달러금액 * 환율
     const purchaseKrw = (amountNum / maxAmount) * investment.purchase_krw;
     const profitLoss = sellKrw - purchaseKrw;
 
@@ -76,6 +81,7 @@ export default function SellModal({
         sellKrw,
         exchangeRate: rateNum,
         sellDate,
+        sellNumber: sellNumber ? parseInt(sellNumber, 10) : undefined,
       });
       onClose();
     } catch (error) {
@@ -86,7 +92,10 @@ export default function SellModal({
     }
   };
 
-  const sellKrw = parseFloat(sellAmount) * parseFloat(exchangeRate) || 0;
+  // 엔화의 경우 환율이 100엔당 원화이므로 계산 방식이 다름
+  const sellKrw = currency === 'jpy'
+    ? (parseFloat(sellAmount) * parseFloat(exchangeRate)) / 100 || 0
+    : parseFloat(sellAmount) * parseFloat(exchangeRate) || 0;
   const purchaseKrw =
     (parseFloat(sellAmount) / maxAmount) * investment.purchase_krw || 0;
   const profitLoss = sellKrw - purchaseKrw;
@@ -100,6 +109,24 @@ export default function SellModal({
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              매도 번호 (선택사항)
+            </label>
+            <input
+              type="number"
+              step="1"
+              min="1"
+              value={sellNumber}
+              onChange={(e) => setSellNumber(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-toss-blue-500 focus:border-transparent"
+              placeholder="자동 생성 (비워두면 자동으로 번호가 생성됩니다)"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              번호를 입력하지 않으면 자동으로 생성됩니다.
+            </p>
+          </div>
+          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               매도 금액 ({currency === 'dollar' ? 'USD' : 'JPY'})
@@ -134,6 +161,7 @@ export default function SellModal({
             />
             <p className="text-xs text-gray-500 mt-1">
               현재 환율: {currentRate.toLocaleString()}
+              {currency === 'jpy' && ' (100엔당)'}
             </p>
           </div>
 

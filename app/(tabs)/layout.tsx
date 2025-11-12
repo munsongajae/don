@@ -4,10 +4,10 @@ import { usePathname } from 'next/navigation';
 import TossTabs from '@/components/navigation/TossTabs';
 
 const tabs = [
-  { id: 'summary', label: '종합', icon: '📊', href: '/summary' },
-  { id: 'analysis', label: '분석', icon: '📈', href: '/analysis' },
-  { id: 'investment', label: '투자', icon: '💰', href: '/investment' },
-  { id: 'sell-records', label: '매도', icon: '📋', href: '/sell-records' },
+  { id: 'summary', label: '종합', icon: '📊', href: '/summary', requiresAuth: false },
+  { id: 'analysis', label: '분석', icon: '📈', href: '/analysis', requiresAuth: false },
+  { id: 'investment', label: '투자', icon: '💰', href: '/investment', requiresAuth: true },
+  { id: 'sell-records', label: '매도', icon: '📋', href: '/sell-records', requiresAuth: true },
 ];
 
 export default function TabsLayout({

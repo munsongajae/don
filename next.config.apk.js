@@ -1,14 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'export', // 정적 내보내기 (APK 빌드용)
   images: {
     domains: [],
     unoptimized: true, // Capacitor를 위해 이미지 최적화 비활성화
   },
-  // 안드로이드 빌드용: 환경 변수로 제어
-  // 주의: output: 'export'를 사용하면 동적 API Routes가 작동하지 않습니다
-  // 개발 모드에서는 이 옵션을 비활성화하고 Next.js 개발 서버를 사용하세요
-  // ...(process.env.NEXT_CONFIG === 'apk' && { output: 'export' }),
+  // API Routes는 정적 빌드에서 사용할 수 없으므로 제외
+  // 대신 Netlify 배포 URL을 사용해야 함
   
   webpack: (config, { isServer }) => {
     // 클라이언트 사이드에서 Node.js 모듈 완전 제외

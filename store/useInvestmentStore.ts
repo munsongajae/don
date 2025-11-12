@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { DollarInvestment, JpyInvestment, DollarSellRecord, JpySellRecord } from '@/types';
+import { API_BASE_URL } from '@/lib/config/constants';
+import { supabase } from '@/lib/supabase/client';
 
 interface InvestmentStore {
   dollarInvestments: DollarInvestment[];
@@ -42,7 +44,17 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
   fetchDollarInvestments: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch('/api/investments/dollar');
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiUrl = API_BASE_URL ? `${API_BASE_URL}/api/investments/dollar` : '/api/investments/dollar';
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(apiUrl, { headers });
       if (!response.ok) {
         throw new Error('달러 투자 목록 조회 실패');
       }
@@ -59,9 +71,19 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
   createDollarInvestment: async (data) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch('/api/investments/dollar', {
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiUrl = API_BASE_URL ? `${API_BASE_URL}/api/investments/dollar` : '/api/investments/dollar';
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(data),
       });
       if (!response.ok) {
@@ -80,8 +102,21 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
   deleteDollarInvestment: async (id) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch(`/api/investments/dollar?id=${id}`, {
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiUrl = API_BASE_URL 
+        ? `${API_BASE_URL}/api/investments/dollar?id=${id}` 
+        : `/api/investments/dollar?id=${id}`;
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(apiUrl, {
         method: 'DELETE',
+        headers,
       });
       if (!response.ok) {
         throw new Error('달러 투자 삭제 실패');
@@ -98,7 +133,17 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
   fetchJpyInvestments: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch('/api/investments/jpy');
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiUrl = API_BASE_URL ? `${API_BASE_URL}/api/investments/jpy` : '/api/investments/jpy';
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(apiUrl, { headers });
       if (!response.ok) {
         throw new Error('엔화 투자 목록 조회 실패');
       }
@@ -115,9 +160,19 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
   createJpyInvestment: async (data) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch('/api/investments/jpy', {
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiUrl = API_BASE_URL ? `${API_BASE_URL}/api/investments/jpy` : '/api/investments/jpy';
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(data),
       });
       if (!response.ok) {
@@ -136,8 +191,21 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
   deleteJpyInvestment: async (id) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch(`/api/investments/jpy?id=${id}`, {
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiUrl = API_BASE_URL 
+        ? `${API_BASE_URL}/api/investments/jpy?id=${id}` 
+        : `/api/investments/jpy?id=${id}`;
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(apiUrl, {
         method: 'DELETE',
+        headers,
       });
       if (!response.ok) {
         throw new Error('엔화 투자 삭제 실패');
@@ -154,7 +222,17 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
   fetchDollarSellRecords: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch('/api/sell-records/dollar');
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiUrl = API_BASE_URL ? `${API_BASE_URL}/api/sell-records/dollar` : '/api/sell-records/dollar';
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(apiUrl, { headers });
       if (!response.ok) {
         throw new Error('달러 매도 기록 조회 실패');
       }
@@ -171,9 +249,19 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
   createDollarSellRecord: async (data) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch('/api/sell-records/dollar', {
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiUrl = API_BASE_URL ? `${API_BASE_URL}/api/sell-records/dollar` : '/api/sell-records/dollar';
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(data),
       });
       if (!response.ok) {
@@ -193,8 +281,21 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
   deleteDollarSellRecord: async (id) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch(`/api/sell-records/dollar?id=${id}`, {
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiUrl = API_BASE_URL 
+        ? `${API_BASE_URL}/api/sell-records/dollar?id=${id}` 
+        : `/api/sell-records/dollar?id=${id}`;
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(apiUrl, {
         method: 'DELETE',
+        headers,
       });
       if (!response.ok) {
         throw new Error('달러 매도 기록 삭제 실패');
@@ -211,7 +312,17 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
   fetchJpySellRecords: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch('/api/sell-records/jpy');
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiUrl = API_BASE_URL ? `${API_BASE_URL}/api/sell-records/jpy` : '/api/sell-records/jpy';
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(apiUrl, { headers });
       if (!response.ok) {
         throw new Error('엔화 매도 기록 조회 실패');
       }
@@ -228,9 +339,19 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
   createJpySellRecord: async (data) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch('/api/sell-records/jpy', {
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiUrl = API_BASE_URL ? `${API_BASE_URL}/api/sell-records/jpy` : '/api/sell-records/jpy';
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(data),
       });
       if (!response.ok) {
@@ -250,8 +371,21 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
   deleteJpySellRecord: async (id) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch(`/api/sell-records/jpy?id=${id}`, {
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiUrl = API_BASE_URL 
+        ? `${API_BASE_URL}/api/sell-records/jpy?id=${id}` 
+        : `/api/sell-records/jpy?id=${id}`;
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(apiUrl, {
         method: 'DELETE',
+        headers,
       });
       if (!response.ok) {
         throw new Error('엔화 매도 기록 삭제 실패');

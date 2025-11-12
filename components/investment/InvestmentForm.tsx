@@ -14,6 +14,7 @@ interface InvestmentFormProps {
     purchaseKrw: number;
     purchaseDate: string;
     exchangeName: string;
+    investmentNumber?: number;
   }) => Promise<void>;
   onCancel: () => void;
 }
@@ -30,6 +31,7 @@ export default function InvestmentForm({
     new Date().toISOString().split('T')[0]
   );
   const [exchangeName, setExchangeName] = useState('');
+  const [investmentNumber, setInvestmentNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // 주요 은행 목록
@@ -94,7 +96,10 @@ export default function InvestmentForm({
       return;
     }
     
-    const purchaseKrw = amountNum * rateNum;
+    // 엔화의 경우 환율이 100엔당 원화이므로 계산 방식이 다름
+    const purchaseKrw = currency === 'jpy' 
+      ? (amountNum * rateNum) / 100  // JPY: (엔화금액 * 100엔당환율) / 100
+      : amountNum * rateNum;         // USD: 달러금액 * 환율
     
     setIsSubmitting(true);
     try {
@@ -104,12 +109,14 @@ export default function InvestmentForm({
         purchaseKrw,
         purchaseDate,
         exchangeName: exchangeName.trim(),
+        investmentNumber: investmentNumber ? parseInt(investmentNumber, 10) : undefined,
       });
       // 폼 초기화
       setAmount('');
       setExchangeRate(currentRate.toString());
       setPurchaseDate(new Date().toISOString().split('T')[0]);
       setExchangeName('');
+      setInvestmentNumber('');
     } catch (error) {
       console.error('투자 등록 실패:', error);
       alert('투자 등록에 실패했습니다.');
@@ -118,7 +125,10 @@ export default function InvestmentForm({
     }
   };
 
-  const purchaseKrw = parseFloat(amount) * parseFloat(exchangeRate) || 0;
+  // 엔화의 경우 환율이 100엔당 원화이므로 계산 방식이 다름
+  const purchaseKrw = currency === 'jpy'
+    ? (parseFloat(amount) * parseFloat(exchangeRate)) / 100 || 0
+    : parseFloat(amount) * parseFloat(exchangeRate) || 0;
 
   return (
     <TossCard>
@@ -127,6 +137,24 @@ export default function InvestmentForm({
       </h3>
       
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            투자 번호 (선택사항)
+          </label>
+          <input
+            type="number"
+            step="1"
+            min="1"
+            value={investmentNumber}
+            onChange={(e) => setInvestmentNumber(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-toss-blue-500 focus:border-transparent"
+            placeholder="자동 생성 (비워두면 자동으로 번호가 생성됩니다)"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            번호를 입력하지 않으면 자동으로 생성됩니다.
+          </p>
+        </div>
+        
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {currency === 'dollar' ? '달러 금액 (USD)' : '엔화 금액 (JPY)'}
@@ -157,6 +185,7 @@ export default function InvestmentForm({
           />
           <p className="text-xs text-gray-500 mt-1">
             현재 환율: {currentRate.toLocaleString()}
+            {currency === 'jpy' && ' (100엔당)'}
           </p>
         </div>
         

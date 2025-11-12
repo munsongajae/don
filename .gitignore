@@ -67,6 +67,11 @@ tailwind.config.js
 tsconfig.node.json
 index.html
 
+# Capacitor
+/android
+/ios
+.capacitor
+
 # IDE
 .idea/
 .devcontainer/

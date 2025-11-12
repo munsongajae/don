@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { PeriodData, ExchangeRate } from '@/types';
+import { API_BASE_URL } from '@/lib/config/constants';
 
 interface ExchangeRateStore {
   currentRates: ExchangeRate | null;
@@ -21,7 +22,11 @@ export const useExchangeRateStore = create<ExchangeRateStore>((set, get) => ({
   fetchCurrentRates: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch('/api/exchange-rates/current');
+      // API_BASE_URL이 있으면 절대 URL 사용, 없으면 상대 URL 사용
+      const apiUrl = API_BASE_URL 
+        ? `${API_BASE_URL}/api/exchange-rates/current`
+        : '/api/exchange-rates/current';
+      const response = await fetch(apiUrl);
       if (!response.ok) {
         throw new Error('실시간 환율 조회 실패');
       }
@@ -44,7 +49,11 @@ export const useExchangeRateStore = create<ExchangeRateStore>((set, get) => ({
 
     set({ loading: true, error: null });
     try {
-      const response = await fetch(`/api/exchange-rates/period/${periodMonths}`);
+      // API_BASE_URL이 있으면 절대 URL 사용, 없으면 상대 URL 사용
+      const apiUrl = API_BASE_URL
+        ? `${API_BASE_URL}/api/exchange-rates/period/${periodMonths}`
+        : `/api/exchange-rates/period/${periodMonths}`;
+      const response = await fetch(apiUrl);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || '기간별 데이터 조회 실패');

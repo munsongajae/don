@@ -1,72 +1,114 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import {
   loadDollarInvestments,
   saveDollarInvestment,
   deleteDollarInvestment,
 } from '@/lib/database/dollar-db';
+import { createServerClientFromHeaders } from '@/lib/middleware/auth';
+import { corsResponse, corsOptions } from '@/lib/utils/cors';
 
-export async function GET() {
+export async function OPTIONS() {
+  return corsOptions();
+}
+
+export async function GET(request: NextRequest) {
   try {
-    const investments = await loadDollarInvestments();
-    return NextResponse.json(investments);
+    // 인증 확인
+    const { client } = createServerClientFromHeaders(request);
+    const { data: { user } } = await client.auth.getUser();
+    
+    if (!user) {
+      return corsResponse(
+        { error: 'Unauthorized' },
+        401
+      );
+    }
+
+    // 사용자별 데이터 로드
+    const investments = await loadDollarInvestments(user.id);
+    return corsResponse(investments);
   } catch (error) {
     console.error('달러 투자 목록 조회 실패:', error);
-    return NextResponse.json(
+    return corsResponse(
       { error: 'Failed to load dollar investments' },
-      { status: 500 }
+      500
     );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // 인증 확인
+    const { client } = createServerClientFromHeaders(request);
+    const { data: { user } } = await client.auth.getUser();
+    
+    if (!user) {
+      return corsResponse(
+        { error: 'Unauthorized' },
+        401
+      );
+    }
+
     const body = await request.json();
-    const investment = await saveDollarInvestment(body);
+    // user_id 추가
+    const investment = await saveDollarInvestment({ ...body, user_id: user.id });
     
     if (!investment) {
-      return NextResponse.json(
+      return corsResponse(
         { error: 'Failed to save dollar investment' },
-        { status: 500 }
+        500
       );
     }
     
-    return NextResponse.json(investment);
+    return corsResponse(investment);
   } catch (error) {
     console.error('달러 투자 저장 실패:', error);
-    return NextResponse.json(
+    return corsResponse(
       { error: 'Failed to save dollar investment' },
-      { status: 500 }
+      500
     );
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
+    // 인증 확인
+    const { client } = createServerClientFromHeaders(request);
+    const { data: { user } } = await client.auth.getUser();
+    
+    if (!user) {
+      return corsResponse(
+        { error: 'Unauthorized' },
+        401
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     
     if (!id) {
-      return NextResponse.json(
+      return corsResponse(
         { error: 'Investment ID is required' },
-        { status: 400 }
+        400
       );
     }
     
-    const success = await deleteDollarInvestment(id);
+    // 사용자별 삭제 (본인 데이터만 삭제 가능)
+    const success = await deleteDollarInvestment(id, user.id);
     
     if (!success) {
-      return NextResponse.json(
+      return corsResponse(
         { error: 'Failed to delete dollar investment' },
-        { status: 500 }
+        500
       );
     }
     
-    return NextResponse.json({ success: true });
+    return corsResponse({ success: true });
   } catch (error) {
     console.error('달러 투자 삭제 실패:', error);
-    return NextResponse.json(
+    return corsResponse(
       { error: 'Failed to delete dollar investment' },
-      { status: 500 }
+      500
     );
   }
 }

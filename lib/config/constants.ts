@@ -34,3 +34,13 @@ export const INVESTING_EXCHANGE_RATES_TABLE_URL = 'https://kr.investing.com/curr
 export const HANA_BANK_URL = 'https://finance.naver.com/marketindex/';
 export const BITHUMB_USDT_URL = 'https://api.bithumb.com/public/ticker/USDT_KRW';
 
+// API Base URL (환경에 따라 변경)
+// 개발 환경: 현재 포트를 사용하거나 상대 경로 사용
+// 프로덕션: Netlify 배포 URL 사용
+export const API_BASE_URL = 
+  typeof window !== 'undefined'
+    ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? '' // 로컬 개발: 상대 경로 사용 (같은 서버에서 실행되므로)
+      : process.env.NEXT_PUBLIC_API_BASE_URL || '' // 프로덕션: Netlify URL 또는 빈 문자열 (상대 경로)
+    : ''; // 서버 사이드: 상대 경로
+

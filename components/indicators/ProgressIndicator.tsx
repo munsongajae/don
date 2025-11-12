@@ -54,35 +54,25 @@ export default function ProgressIndicator({
         )}
       </div>
       
-      <div className="mb-5">
-        <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-          {current.toLocaleString()}{unit && <span className="ml-1 text-lg">{unit}</span>}
-        </div>
-        {!hideHighLow && (
-          <div className="text-xs sm:text-sm text-gray-600 space-y-1">
-            <div>중간값: <span className="font-semibold">{mid.toLocaleString()}{unit}</span></div>
-            <div className="flex flex-wrap gap-x-3">
-              <span>최저: <span className="font-medium">{low.toLocaleString()}{unit}</span></span>
-              <span>최고: <span className="font-medium">{high.toLocaleString()}{unit}</span></span>
-            </div>
-          </div>
-        )}
-        {hideHighLow && (
-          <div className="text-xs sm:text-sm text-gray-600">
-            중간값: <span className="font-semibold">{mid.toLocaleString()}{unit}</span>
-          </div>
-        )}
-      </div>
-      
       {/* 진행 바 컨테이너 */}
-      <div className="relative">
+      <div className="relative mb-2">
         {/* 진행 바 배경 */}
-        <div className="relative h-4 sm:h-5 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+        <div className="relative h-4 sm:h-5 bg-gray-100 rounded-full overflow-visible shadow-inner">
           {/* 중간값 위치 표시선 */}
           <div 
             className="absolute top-0 bottom-0 w-0.5 bg-gray-400 z-0 transition-all duration-300" 
             style={{ left: `${Math.max(0, Math.min(100, midPosition))}%` }}
           />
+          
+          {/* 중간값 마커 위에 값 표시 */}
+          <div
+            className="absolute -top-6 -translate-x-1/2 z-30"
+            style={{ left: `${Math.max(0, Math.min(100, midPosition))}%` }}
+          >
+            <div className="text-xs font-semibold text-gray-700 whitespace-nowrap">
+              {mid.toLocaleString()}{unit}
+            </div>
+          </div>
           
           {/* 현재 위치 마커 (더 크고 명확하게) */}
           <div
@@ -95,10 +85,26 @@ export default function ProgressIndicator({
             )}
             style={{ left: `${Math.max(0, Math.min(100, currentPosition))}%` }}
           />
+          
+          {/* 현재값 마커 위에 값 표시 */}
+          <div
+            className="absolute -bottom-6 -translate-x-1/2 z-30"
+            style={{ left: `${Math.max(0, Math.min(100, currentPosition))}%` }}
+          >
+            <div className={clsx(
+              'text-xs sm:text-sm font-bold whitespace-nowrap',
+              {
+                'text-green-600': isGood,
+                'text-red-600': !isGood,
+              }
+            )}>
+              {current.toLocaleString()}{unit}
+            </div>
+          </div>
         </div>
         
-        {/* 범위 라벨 (선택적) */}
-        <div className="flex justify-between mt-2 text-xs text-gray-400">
+        {/* 범위 라벨 (최저/최고값) */}
+        <div className="flex justify-between mt-8 text-xs text-gray-400">
           <span>{low.toLocaleString()}</span>
           <span>{high.toLocaleString()}</span>
         </div>
