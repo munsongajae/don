@@ -49,12 +49,24 @@ export default function TossTabs({ tabs, activeTab }: TossTabsProps) {
                 }
               )}
             >
-              <div className="flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base">
-                {tab.icon && <span className="text-base sm:text-lg">{tab.icon}</span>}
-                <span>{tab.label}</span>
-                {tab.requiresAuth && !user && (
-                  <span className="text-xs">🔒</span>
+              <div className="flex flex-col items-center justify-center gap-1 text-xs sm:text-sm leading-tight">
+                {tab.icon && (
+                  <span
+                    className={clsx(
+                      'inline-block leading-none',
+                      activeTab === tab.id ? 'text-toss-blue-600' : 'text-gray-500',
+                      'text-lg sm:text-xl'
+                    )}
+                  >
+                    {tab.icon}
+                  </span>
                 )}
+                <div className="flex items-center gap-1 leading-tight">
+                  <span className="font-medium">{tab.label}</span>
+                  {tab.requiresAuth && !user && (
+                    <span className="text-[10px]">🔒</span>
+                  )}
+                </div>
               </div>
               {activeTab === tab.id && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-toss-blue-600 rounded-full" />
