@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from 'react';
 import { useInvestmentStore } from '@/store/useInvestmentStore';
 import ConditionalAuthGuard from '@/components/auth/ConditionalAuthGuard';

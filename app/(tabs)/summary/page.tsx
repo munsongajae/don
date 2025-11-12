@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from 'react';
 import { useExchangeRateStore } from '@/store/useExchangeRateStore';
 import MetricCard from '@/components/metrics/MetricCard';
