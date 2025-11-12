@@ -27,6 +27,16 @@ export function formatKrw(value: number): string {
 }
 
 /**
+ * 숫자를 원화 형식으로 포맷팅하되 단위(원)를 표시하지 않습니다.
+ */
+export function formatKrwPlain(value: number): string {
+  if (isNaN(value) || !isFinite(value)) {
+    return '0';
+  }
+  return Math.round(value).toLocaleString('ko-KR');
+}
+
+/**
  * 숫자를 퍼센트 형식으로 포맷팅합니다.
  */
 export function formatPercentage(value: number, decimals: number = 2): string {

@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState } from 'react';
 import { useExchangeRateStore } from '@/store/useExchangeRateStore';
 import MetricCard from '@/components/metrics/MetricCard';
-import { formatKrw, formatPercentage } from '@/lib/utils/formatters';
+import { formatKrw, formatKrwPlain, formatPercentage } from '@/lib/utils/formatters';
 import { calculateDollarIndexSeries, calculateCurrentDxy, calculateJpyIndexSeries, calculateCurrentJxy, calculateIndicatorSignal, calculateIndicatorSignals } from '@/lib/utils/calculations';
 
 export default function SummaryPage() {
@@ -222,22 +222,22 @@ export default function SummaryPage() {
         <div className="grid grid-cols-2 gap-4">
           <MetricCard
             title="USD/KRW (인베스팅)"
-            value={currentRates ? formatKrw(currentRates.investingUsd) : '로딩 중...'}
+            value={currentRates ? formatKrwPlain(currentRates.investingUsd) : '로딩 중...'}
             icon="💵"
           />
           <MetricCard
             title="USD/KRW (하나은행)"
-            value={currentRates ? formatKrw(currentRates.hanaRate) : '로딩 중...'}
+            value={currentRates ? formatKrwPlain(currentRates.hanaRate) : '로딩 중...'}
             icon="🏦"
           />
           <MetricCard
             title="USDT/KRW (빗썸)"
-            value={currentRates ? formatKrw(currentRates.usdtKrw) : '로딩 중...'}
+            value={currentRates ? formatKrwPlain(currentRates.usdtKrw) : '로딩 중...'}
             icon="₿"
           />
           <MetricCard
             title="JPY/KRW (인베스팅)"
-            value={currentRates ? `${currentRates.investingJpy.toFixed(4)}원` : '로딩 중...'}
+            value={currentRates ? currentRates.investingJpy.toFixed(4) : '로딩 중...'}
             icon="💴"
           />
           <MetricCard
