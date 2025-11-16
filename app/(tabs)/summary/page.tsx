@@ -101,15 +101,15 @@ export default function SummaryPage() {
         const usdKrwHigh = Math.max(...(data.high.USD_KRW || []));
         const usdKrwLow = Math.min(...(data.low.USD_KRW || []));
         const usdKrwMid = (usdKrwHigh + usdKrwLow) / 2;
-        // 원본과 동일: currentPrices에서 USD_KRW 가져오기 (우선순위: currentPrices > fallback 종가 > investingUsd > hanaRate)
-        let currentUsdKrw = currentPrices.USD_KRW || 0;
+        // 분석 탭과 동일한 데이터 소스 사용 (currentRates 우선)
+        let currentUsdKrw = data.currentRates.investingUsd || data.currentRates.hanaRate || 0;
         if (currentUsdKrw === 0) {
-          // Fallback: 마지막 종가 사용
-          currentUsdKrw = getCurrentPrice('USD_KRW');
+          // Fallback: currentPrices 사용
+          currentUsdKrw = currentPrices.USD_KRW || 0;
         }
         if (currentUsdKrw === 0) {
-          // 추가 Fallback: 실시간 환율 사용
-          currentUsdKrw = data.currentRates.investingUsd || data.currentRates.hanaRate || 0;
+          // 추가 Fallback: 마지막 종가 사용
+          currentUsdKrw = getCurrentPrice('USD_KRW');
         }
         console.log(`기간 ${period}개월: currentUsdKrw:`, currentUsdKrw, {
           fromCurrentPrices: currentPrices.USD_KRW,
@@ -135,16 +135,18 @@ export default function SummaryPage() {
         const jxyLow = Math.min(...jxySeries);
         const jxyMid = (jxyHigh + jxyLow) / 2;
 
-        // JPY/KRW 계산 (원본과 동일: currentPrices에서 가져오기, 없으면 계산)
-        let currentJpyKrw = currentPrices.JPY_KRW || 0;
+        // JPY/KRW 계산 (분석 탭과 동일한 데이터 소스 사용, currentRates 우선)
+        let currentJpyKrw = data.currentRates.investingJpy || 0;
         if (currentJpyKrw === 0) {
-          // Fallback: USD_KRW와 USD_JPY로부터 계산
+          // Fallback: currentPrices 사용
+          currentJpyKrw = currentPrices.JPY_KRW || 0;
+        }
+        if (currentJpyKrw === 0) {
+          // 추가 Fallback: USD_KRW와 USD_JPY로부터 계산
           const usdKrw = getCurrentPrice('USD_KRW');
           const usdJpy = getCurrentPrice('USD_JPY');
           if (usdKrw > 0 && usdJpy > 0) {
             currentJpyKrw = usdKrw / usdJpy;
-          } else {
-            currentJpyKrw = data.currentRates.investingJpy || 0;
           }
         }
         const jpyKrwHigh = Math.max(...((data.high.JPY_KRW || []).filter(v => v > 0)));

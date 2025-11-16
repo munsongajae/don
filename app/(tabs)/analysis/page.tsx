@@ -69,7 +69,8 @@ export default function AnalysisPage() {
         const usdKrwHigh = Math.max(...usdKrwHighArray);
         const usdKrwLow = Math.min(...usdKrwLowArray);
         const usdKrwMid = (usdKrwHigh + usdKrwLow) / 2;
-        const currentUsdKrw = currentPrices.USD_KRW || data.currentRates.investingUsd || data.currentRates.hanaRate || 0;
+        // 종합 탭과 동일한 데이터 소스 사용 (currentRates 우선)
+        const currentUsdKrw = data.currentRates.investingUsd || data.currentRates.hanaRate || currentPrices.USD_KRW || 0;
 
         if (currentUsdKrw === 0 || usdKrwMid === 0) {
           console.warn('USD/KRW 현재값 또는 중간값이 0입니다.', {
@@ -170,8 +171,8 @@ export default function AnalysisPage() {
         const jpyKrwHigh = Math.max(...jpyKrwHighArray);
         const jpyKrwLow = Math.min(...jpyKrwLowArray);
         const jpyKrwMid = (jpyKrwHigh + jpyKrwLow) / 2;
-        // 원본과 동일: JPY/KRW는 1엔당이지만, 표시는 100엔당으로 변환
-        const currentJpyKrw = currentPrices.JPY_KRW || data.currentRates.investingJpy || 0;
+        // 종합 탭과 동일한 데이터 소스 사용 (currentRates 우선), 1엔당이지만 표시는 100엔당으로 변환
+        const currentJpyKrw = data.currentRates.investingJpy || currentPrices.JPY_KRW || 0;
 
         if (currentJpyKrw === 0 || jpyKrwMid === 0) {
           console.warn('JPY/KRW 현재값 또는 중간값이 0입니다.', {
