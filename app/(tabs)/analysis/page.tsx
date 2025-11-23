@@ -67,7 +67,7 @@ export default function AnalysisPage() {
         }
 
         const usdKrwHigh = Math.max(...usdKrwHighArray);
-        const usdKrwLow = Math.min(...usdKrwLowArray);
+        const usdKrwLow = Math.min(...usdKrwHighArray);
         const usdKrwMid = (usdKrwHigh + usdKrwLow) / 2;
         // 종합 탭과 동일한 데이터 소스 사용 (currentRates 우선)
         const currentUsdKrw = data.currentRates.investingUsd || data.currentRates.hanaRate || currentPrices.USD_KRW || 0;
@@ -348,6 +348,7 @@ export default function AnalysisPage() {
               low={analysisData.fairRate.fair * 0.9}
               mid={analysisData.fairRate.fair}
               signal={analysisData.fairRate.signal}
+              reverseLogic={true}
               hideHighLow={true}
               unit="원"
             />
@@ -434,6 +435,7 @@ export default function AnalysisPage() {
               low={analysisData.jpyFairRate.fair * 0.9}
               mid={analysisData.jpyFairRate.fair}
               signal={analysisData.jpyFairRate.signal}
+              reverseLogic={true}
               hideHighLow
               unit="원"
             />
