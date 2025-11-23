@@ -2,6 +2,10 @@ import { NextRequest } from 'next/server';
 import { getAllBankRates } from '@/lib/services/bank-rates';
 import { corsResponse, corsOptions } from '@/lib/utils/cors';
 
+// Vercel 서버리스 함수 타임아웃 설정 (최대 60초, Pro 플랜 필요)
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
 export async function OPTIONS() {
   return corsOptions();
 }
