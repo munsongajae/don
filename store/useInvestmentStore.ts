@@ -264,17 +264,24 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
         headers,
         body: JSON.stringify(data),
       });
+      
       if (!response.ok) {
-        throw new Error('달러 매도 기록 등록 실패');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || '달러 매도 기록 등록 실패';
+        throw new Error(errorMessage);
       }
+      
       set({ loading: false });
       await get().fetchDollarSellRecords();
       await get().fetchDollarInvestments(); // 투자 목록도 갱신
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
       set({
-        error: error instanceof Error ? error.message : '알 수 없는 오류',
+        error: errorMessage,
         loading: false,
       });
+      // 에러를 다시 throw하여 호출자가 처리할 수 있도록 함
+      throw error;
     }
   },
 
@@ -354,17 +361,24 @@ export const useInvestmentStore = create<InvestmentStore>((set, get) => ({
         headers,
         body: JSON.stringify(data),
       });
+      
       if (!response.ok) {
-        throw new Error('엔화 매도 기록 등록 실패');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || '엔화 매도 기록 등록 실패';
+        throw new Error(errorMessage);
       }
+      
       set({ loading: false });
       await get().fetchJpySellRecords();
       await get().fetchJpyInvestments(); // 투자 목록도 갱신
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
       set({
-        error: error instanceof Error ? error.message : '알 수 없는 오류',
+        error: errorMessage,
         loading: false,
       });
+      // 에러를 다시 throw하여 호출자가 처리할 수 있도록 함
+      throw error;
     }
   },
 

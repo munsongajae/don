@@ -172,47 +172,65 @@ function InvestmentPageContent() {
     sellDate: string;
     sellNumber?: number;
   }) => {
-    if (!selectedInvestment) return;
+    if (!selectedInvestment) {
+      throw new Error('선택된 투자가 없습니다.');
+    }
 
-    // 원본 투자 정보 찾기 (매도 기록 반영 전 원본 금액)
-    const originalInvestment = (currency === 'dollar' 
-      ? dollarInvestments.find(inv => inv.id === selectedInvestment.id)
-      : jpyInvestments.find(inv => inv.id === selectedInvestment.id)
-    ) || selectedInvestment;
-    
-    const originalAmount = currency === 'dollar' 
-      ? (originalInvestment as DollarInvestment).usd_amount
-      : (originalInvestment as JpyInvestment).jpy_amount;
-    
-    // 원본 금액 기준으로 매수 금액 계산
-    const purchaseKrw = (sellData.amount / originalAmount) * originalInvestment.purchase_krw;
-    const profitLoss = sellData.sellKrw - purchaseKrw;
-    const profitRate = purchaseKrw > 0 ? (profitLoss / purchaseKrw) * 100 : 0;
+    try {
+      // 원본 투자 정보 찾기 (매도 기록 반영 전 원본 금액)
+      const originalInvestment = (currency === 'dollar' 
+        ? dollarInvestments.find(inv => inv.id === selectedInvestment.id)
+        : jpyInvestments.find(inv => inv.id === selectedInvestment.id)
+      ) || selectedInvestment;
+      
+      if (!originalInvestment) {
+        throw new Error('투자 정보를 찾을 수 없습니다.');
+      }
+      
+      const originalAmount = currency === 'dollar' 
+        ? (originalInvestment as DollarInvestment).usd_amount
+        : (originalInvestment as JpyInvestment).jpy_amount;
+      
+      if (originalAmount <= 0) {
+        throw new Error('유효하지 않은 투자 금액입니다.');
+      }
+      
+      // 원본 금액 기준으로 매수 금액 계산
+      const purchaseKrw = (sellData.amount / originalAmount) * originalInvestment.purchase_krw;
+      const profitLoss = sellData.sellKrw - purchaseKrw;
+      const profitRate = purchaseKrw > 0 ? (profitLoss / purchaseKrw) * 100 : 0;
 
-            if (currency === 'dollar') {
-              await createDollarSellRecord({
-                investment_id: sellData.investmentId,
-                sell_date: sellData.sellDate,
-                usd_amount: sellData.amount,
-                sell_krw: sellData.sellKrw,
-                exchange_rate: sellData.exchangeRate,
-                profit_loss: profitLoss,
-                profit_rate: profitRate,
-                sell_number: sellData.sellNumber,
-              } as any);
-            } else {
-              await createJpySellRecord({
-                investment_id: sellData.investmentId,
-                sell_date: sellData.sellDate,
-                jpy_amount: sellData.amount,
-                sell_krw: sellData.sellKrw,
-                exchange_rate: sellData.exchangeRate,
-                profit_loss: profitLoss,
-                profit_rate: profitRate,
-                sell_number: sellData.sellNumber,
-              } as any);
-            }
-    setSelectedInvestment(null);
+      if (currency === 'dollar') {
+        await createDollarSellRecord({
+          investment_id: sellData.investmentId,
+          sell_date: sellData.sellDate,
+          usd_amount: sellData.amount,
+          sell_krw: sellData.sellKrw,
+          exchange_rate: sellData.exchangeRate,
+          profit_loss: profitLoss,
+          profit_rate: profitRate,
+          sell_number: sellData.sellNumber,
+        } as any);
+      } else {
+        await createJpySellRecord({
+          investment_id: sellData.investmentId,
+          sell_date: sellData.sellDate,
+          jpy_amount: sellData.amount,
+          sell_krw: sellData.sellKrw,
+          exchange_rate: sellData.exchangeRate,
+          profit_loss: profitLoss,
+          profit_rate: profitRate,
+          sell_number: sellData.sellNumber,
+        } as any);
+      }
+      
+      // 성공 시에만 모달 닫기
+      setSelectedInvestment(null);
+    } catch (error) {
+      console.error('매도 처리 중 오류:', error);
+      // 에러를 다시 throw하여 SellModal에서 처리하도록 함
+      throw error;
+    }
   };
 
   return (

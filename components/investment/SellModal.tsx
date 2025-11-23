@@ -86,7 +86,10 @@ export default function SellModal({
       onClose();
     } catch (error) {
       console.error('매도 실패:', error);
-      alert('매도에 실패했습니다.');
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : '매도에 실패했습니다. 다시 시도해주세요.';
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

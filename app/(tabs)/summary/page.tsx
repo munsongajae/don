@@ -8,10 +8,47 @@ import MetricCard from '@/components/metrics/MetricCard';
 import { formatKrw, formatKrwPlain, formatPercentage } from '@/lib/utils/formatters';
 import { calculateDollarIndexSeries, calculateCurrentDxy, calculateJpyIndexSeries, calculateCurrentJxy, calculateIndicatorSignal, calculateIndicatorSignals } from '@/lib/utils/calculations';
 
+interface BankRateData {
+  bank: string;
+  rate: number;
+  time: string;
+  date: string;
+  currency: string;
+}
+
+interface BankRatesResponse {
+  KB: BankRateData | null;
+  SHINHAN: BankRateData | null;
+  HANA: BankRateData | null;
+  WOORI: BankRateData | null;
+  IBK: BankRateData | null;
+  SC: BankRateData | null;
+  BUSAN: BankRateData | null;
+  IMBANK: BankRateData | null;
+  NH: BankRateData | null;
+  INVESTING: BankRateData | null;
+}
+
+const bankNames: Record<string, string> = {
+  KB: '국민은행',
+  SHINHAN: '신한은행',
+  HANA: '하나은행',
+  WOORI: '우리은행',
+  IBK: '기업은행',
+  SC: 'SC제일은행',
+  BUSAN: '부산은행',
+  IMBANK: 'IM뱅크',
+  NH: 'NH농협은행',
+  INVESTING: '인베스팅닷컴',
+};
+
 export default function SummaryPage() {
   const { currentRates, periodData, loading, fetchCurrentRates, fetchPeriodData } = useExchangeRateStore();
   const [signals, setSignals] = useState<Record<number, any>>({});
   const [currentTime, setCurrentTime] = useState<string>('');
+  const [usdBankRates, setUsdBankRates] = useState<BankRatesResponse | null>(null);
+  const [jpyBankRates, setJpyBankRates] = useState<BankRatesResponse | null>(null);
+  const [bankRatesLoading, setBankRatesLoading] = useState(false);
 
   useEffect(() => {
     fetchCurrentRates();
@@ -19,6 +56,25 @@ export default function SummaryPage() {
     [1, 3, 6, 12].forEach(period => {
       fetchPeriodData(period);
     });
+    
+    // 은행별 환율 조회
+    const fetchBankRates = async () => {
+      setBankRatesLoading(true);
+      try {
+        const [usd, jpy] = await Promise.all([
+          fetch('/api/exchange-rates/banks?currency=USD').then(res => res.json()),
+          fetch('/api/exchange-rates/banks?currency=JPY').then(res => res.json()),
+        ]);
+        setUsdBankRates(usd);
+        setJpyBankRates(jpy);
+      } catch (error) {
+        console.error('은행별 환율 조회 실패:', error);
+      } finally {
+        setBankRatesLoading(false);
+      }
+    };
+    
+    fetchBankRates();
   }, []);
 
   // 클라이언트에서만 시간 업데이트 (hydration 에러 방지)
@@ -406,6 +462,142 @@ export default function SummaryPage() {
                         {periodSignal?.jpy_fair_rate || '-'}
                       </span>
                     </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 달러 환율 테이블 */}
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">💵 달러 USD-KRW</h2>
+        {usdBankRates?.INVESTING && (
+          <div className="mb-4">
+            <div className="text-sm text-gray-600 mb-2">
+              Investing {new Date().toLocaleString('ko-KR')}
+            </div>
+            <div className="text-3xl font-bold">
+              {usdBankRates.INVESTING.rate.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+          </div>
+        )}
+        <div className="bg-white rounded-2xl p-6 shadow-sm overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th className="text-left py-3 px-4 font-semibold text-gray-900">은행</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-900">기준환율</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-900">GAP</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-900">기준시간</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { key: 'KB', data: usdBankRates?.KB },
+                { key: 'SHINHAN', data: usdBankRates?.SHINHAN },
+                { key: 'HANA', data: usdBankRates?.HANA },
+                { key: 'WOORI', data: usdBankRates?.WOORI },
+                { key: 'IBK', data: usdBankRates?.IBK },
+                { key: 'SC', data: usdBankRates?.SC },
+                { key: 'BUSAN', data: usdBankRates?.BUSAN },
+                { key: 'IMBANK', data: usdBankRates?.IMBANK },
+                { key: 'NH', data: usdBankRates?.NH },
+              ].map(({ key, data }) => {
+                if (!data) {
+                  return (
+                    <tr key={key} className="border-b border-gray-100">
+                      <td className="py-3 px-4 font-medium text-gray-900">{bankNames[key]}</td>
+                      <td className="py-3 px-4 text-right">조회 실패</td>
+                      <td className="py-3 px-4 text-right">N/A</td>
+                      <td className="py-3 px-4 text-right"></td>
+                    </tr>
+                  );
+                }
+
+                const investingRate = usdBankRates?.INVESTING?.rate;
+                const gap = investingRate ? investingRate - data.rate : null;
+                const gapStr = gap !== null ? `${gap >= 0 ? '+' : ''}${gap.toFixed(2)}` : 'N/A';
+
+                return (
+                  <tr key={key} className="border-b border-gray-100">
+                    <td className="py-3 px-4 font-medium text-gray-900">{bankNames[key]}</td>
+                    <td className="py-3 px-4 text-right">
+                      {data.rate.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                    <td className={`py-3 px-4 text-right ${gap && gap >= 0 ? 'text-red-600' : gap && gap < 0 ? 'text-blue-600' : ''}`}>
+                      {gapStr}
+                    </td>
+                    <td className="py-3 px-4 text-right text-sm text-gray-600">{data.time}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 엔화 환율 테이블 */}
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">💴 엔 JPY-KRW (100엔)</h2>
+        {jpyBankRates?.INVESTING && (
+          <div className="mb-4">
+            <div className="text-sm text-gray-600 mb-2">
+              Investing {new Date().toLocaleString('ko-KR')}
+            </div>
+            <div className="text-3xl font-bold">
+              {jpyBankRates.INVESTING.rate.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+          </div>
+        )}
+        <div className="bg-white rounded-2xl p-6 shadow-sm overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th className="text-left py-3 px-4 font-semibold text-gray-900">은행</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-900">기준환율</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-900">GAP</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-900">기준시간</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { key: 'KB', data: jpyBankRates?.KB },
+                { key: 'SHINHAN', data: jpyBankRates?.SHINHAN },
+                { key: 'HANA', data: jpyBankRates?.HANA },
+                { key: 'WOORI', data: jpyBankRates?.WOORI },
+                { key: 'IBK', data: jpyBankRates?.IBK },
+                { key: 'SC', data: jpyBankRates?.SC },
+                { key: 'BUSAN', data: jpyBankRates?.BUSAN },
+                { key: 'IMBANK', data: jpyBankRates?.IMBANK },
+                { key: 'NH', data: jpyBankRates?.NH },
+              ].map(({ key, data }) => {
+                if (!data) {
+                  return (
+                    <tr key={key} className="border-b border-gray-100">
+                      <td className="py-3 px-4 font-medium text-gray-900">{bankNames[key]}</td>
+                      <td className="py-3 px-4 text-right">조회 실패</td>
+                      <td className="py-3 px-4 text-right">N/A</td>
+                      <td className="py-3 px-4 text-right"></td>
+                    </tr>
+                  );
+                }
+
+                const investingRate = jpyBankRates?.INVESTING?.rate;
+                const gap = investingRate ? investingRate - data.rate : null;
+                const gapStr = gap !== null ? `${gap >= 0 ? '+' : ''}${gap.toFixed(2)}` : 'N/A';
+
+                return (
+                  <tr key={key} className="border-b border-gray-100">
+                    <td className="py-3 px-4 font-medium text-gray-900">{bankNames[key]}</td>
+                    <td className="py-3 px-4 text-right">
+                      {data.rate.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                    <td className={`py-3 px-4 text-right ${gap && gap >= 0 ? 'text-red-600' : gap && gap < 0 ? 'text-blue-600' : ''}`}>
+                      {gapStr}
+                    </td>
+                    <td className="py-3 px-4 text-right text-sm text-gray-600">{data.time}</td>
                   </tr>
                 );
               })}
