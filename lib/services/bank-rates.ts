@@ -909,32 +909,70 @@ async function getInvestingRate(currency: string = 'USD'): Promise<RateData | nu
   const upperCurrency = currency.toUpperCase();
   const dateStr = formatDate(new Date());
 
-  // exchange-rate.ts와 동일한 완전한 브라우저 헤더 세트 (Cloudflare 우회용)
+  // Cloudflare 우회를 위한 최적화된 헤더 세트
+  // Accept-Encoding 제거: axios가 자동으로 처리하므로 중복 방지
+  // 최신 Chrome User-Agent 사용
   const headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
     'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-    'Accept-Encoding': 'gzip, deflate, br',
     'Connection': 'keep-alive',
     'Upgrade-Insecure-Requests': '1',
     'Sec-Fetch-Dest': 'document',
     'Sec-Fetch-Mode': 'navigate',
     'Sec-Fetch-Site': 'none',
     'Sec-Fetch-User': '?1',
-    'Cache-Control': 'max-age=0',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
     'Referer': 'https://kr.investing.com/',
+    'DNT': '1',
   };
 
-  try {
-    const response = await axios.get(url, { headers, timeout: 10000 });
+  // 재시도 로직 (최대 3회)
+  const maxRetries = 3;
+  let lastError: any = null;
 
-    if (response.status !== 200) return null;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // 재시도 간 딜레이 (첫 시도 제외)
+      if (attempt > 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // 2초, 3초 딜레이
+      }
 
-    const $ = cheerio.load(response.data);
+      const response = await axios.get(url, { 
+        headers, 
+        timeout: 15000,
+        // Cloudflare 우회를 위한 추가 옵션
+        maxRedirects: 5,
+        validateStatus: (status) => status < 500, // 5xx 에러만 throw
+      });
 
-    // 환율표 테이블 찾기
-    const table = $('#exchange_rates_1');
-    if (!table.length) return null;
+      // Cloudflare 보호 페이지 체크
+      if (response.data && typeof response.data === 'string' && response.data.includes('Just a moment')) {
+        console.warn(`[getInvestingRate] ${upperCurrency} Cloudflare 보호 페이지 감지 (시도 ${attempt}/${maxRetries})`);
+        if (attempt < maxRetries) {
+          continue; // 재시도
+        }
+        return null;
+      }
+
+      if (response.status !== 200) {
+        if (attempt < maxRetries) {
+          continue; // 재시도
+        }
+        return null;
+      }
+
+      const $ = cheerio.load(response.data);
+
+      // 환율표 테이블 찾기
+      const table = $('#exchange_rates_1');
+      if (!table.length) {
+        if (attempt < maxRetries) {
+          continue; // 재시도
+        }
+        return null;
+      }
 
     // 현재 시간
     const now = new Date();
@@ -979,15 +1017,31 @@ async function getInvestingRate(currency: string = 'USD'): Promise<RateData | nu
       } catch (parseError: any) {
         console.error(`[getInvestingRate] ${upperCurrency} 파싱 실패:`, parseError?.message);
       }
+      }
+
+      // 성공적으로 파싱했지만 rate가 없으면 재시도
+      if (attempt < maxRetries) {
+        continue;
+      }
+    } catch (error: any) {
+      lastError = error;
+      
+      // 403 에러인 경우 재시도
+      if (error?.response?.status === 403 && attempt < maxRetries) {
+        console.warn(`[getInvestingRate] ${upperCurrency} 403 에러 (시도 ${attempt}/${maxRetries}), 재시도 중...`);
+        continue;
+      }
+
+      // 마지막 시도에서만 에러 로깅
+      if (attempt === maxRetries) {
+        console.error(`[getInvestingRate] ${upperCurrency} 조회 실패 (${maxRetries}회 시도 후):`, {
+          message: error?.message,
+          status: error?.response?.status,
+          statusText: error?.response?.statusText,
+          data: error?.response?.data?.substring?.(0, 200),
+        });
+      }
     }
-  } catch (error: any) {
-    // Vercel 배포 환경에서 디버깅을 위한 에러 로깅
-    console.error(`[getInvestingRate] ${upperCurrency} 조회 실패:`, {
-      message: error?.message,
-      status: error?.response?.status,
-      statusText: error?.response?.statusText,
-      data: error?.response?.data?.substring?.(0, 200),
-    });
   }
 
   return null;
