@@ -54,34 +54,67 @@ export async function fetchPeriodData(periodMonths: number = 12): Promise<Period
           interval: '1d' as const, // 일별 데이터
         });
         
-        // chart() API는 result 속성 안에 배열을 반환할 수 있음
-        const quotes = chartData?.result?.[0]?.indicators?.quote?.[0] || 
-                       chartData?.result || 
-                       (Array.isArray(chartData) ? chartData : []);
+        // 디버깅: 응답 구조 확인
+        console.log(`[${ticker}] chart() 응답 구조:`, {
+          hasResult: !!chartData?.result,
+          resultLength: chartData?.result?.length || 0,
+          hasFirstResult: !!chartData?.result?.[0],
+          firstResultKeys: chartData?.result?.[0] ? Object.keys(chartData.result[0]) : [],
+        });
         
-        if (quotes && Array.isArray(quotes) && quotes.length > 0) {
-          // chart API의 응답 구조에 맞게 변환 (timestamp를 date로 변환)
-          const convertedQuotes = quotes.map((quote: any) => {
-            if (quote.timestamp) {
-              return {
-                date: new Date(quote.timestamp * 1000),
-                open: quote.open,
-                high: quote.high,
-                low: quote.low,
-                close: quote.close,
-                volume: quote.volume,
-              };
-            }
-            // 이미 date 속성이 있으면 그대로 사용
-            return quote;
-          });
+        // chart() API 응답 구조: { result: [{ timestamp: [...], indicators: { quote: [{ open: [...], high: [...], ... }] } }] }
+        const result = chartData?.result?.[0];
+        const timestamps = result?.timestamp || [];
+        const quoteData = result?.indicators?.quote?.[0];
+        
+        if (!quoteData || !timestamps || timestamps.length === 0) {
+          // Fallback: historical()과 유사한 구조일 수도 있음
+          if (Array.isArray(chartData) && chartData.length > 0) {
+            // 배열로 직접 반환된 경우
+            const convertedQuotes = chartData.map((item: any) => {
+              if (item.date) {
+                return {
+                  date: item.date instanceof Date ? item.date : new Date(item.date),
+                  open: item.open || 0,
+                  high: item.high || 0,
+                  low: item.low || 0,
+                  close: item.close || 0,
+                  volume: item.volume || 0,
+                };
+              }
+              return item;
+            });
+            tickerData[ticker] = convertedQuotes;
+            console.log(`티커 ${ticker} 데이터 가져오기 성공 (fallback 배열): ${convertedQuotes.length}개 데이터 포인트`);
+            return;
+          }
           
-          tickerData[ticker] = convertedQuotes;
-          console.log(`티커 ${ticker} 데이터 가져오기 성공: ${convertedQuotes.length}개 데이터 포인트`);
-        } else {
-          console.warn(`티커 ${ticker} 데이터가 비어있습니다.`);
+          console.warn(`티커 ${ticker} 데이터가 비어있습니다.`, {
+            hasResult: !!result,
+            hasTimestamps: !!timestamps,
+            timestampsLength: timestamps?.length || 0,
+            hasQuoteData: !!quoteData,
+            chartDataType: Array.isArray(chartData) ? 'array' : typeof chartData,
+            chartDataKeys: chartData && typeof chartData === 'object' ? Object.keys(chartData) : [],
+          });
           tickerData[ticker] = [];
+          return;
         }
+        
+        // timestamp 배열과 각 필드 배열을 객체 배열로 변환
+        const convertedQuotes = timestamps.map((timestamp: number, index: number) => {
+          return {
+            date: new Date(timestamp * 1000), // Unix timestamp를 Date로 변환
+            open: quoteData.open?.[index] || 0,
+            high: quoteData.high?.[index] || 0,
+            low: quoteData.low?.[index] || 0,
+            close: quoteData.close?.[index] || 0,
+            volume: quoteData.volume?.[index] || 0,
+          };
+        });
+        
+        tickerData[ticker] = convertedQuotes;
+        console.log(`티커 ${ticker} 데이터 가져오기 성공: ${convertedQuotes.length}개 데이터 포인트`);
       } catch (error: any) {
         console.error(`티커 ${ticker} 데이터 가져오기 실패:`, {
           message: error?.message,
