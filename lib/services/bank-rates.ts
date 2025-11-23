@@ -391,7 +391,7 @@ async function getWooriRate(currency: string = 'USD'): Promise<RateData | null> 
     if (response.status !== 200) return null;
 
     const $ = cheerio.load(response.data);
-    const allText = $.text();
+    const allText = $('body').text();
 
     // 고시 시간 추출
     let rateTime = '';
@@ -490,7 +490,7 @@ async function getIbkRate(currency: string = 'USD'): Promise<RateData | null> {
       if (response.status !== 200) continue;
 
       const $ = cheerio.load(response.data);
-      const allText = $.text();
+      const allText = $('body').text();
 
       // 고시 시간 추출
       let rateTime = '';
@@ -691,7 +691,7 @@ async function getBusanRate(currency: string = 'USD'): Promise<RateData | null> 
     if (response.status !== 200) return null;
 
     const $ = cheerio.load(response.data);
-    const allText = $.text();
+    const allText = $('body').text();
 
     // 고시 시간 추출
     let rateTime = '';
@@ -768,7 +768,7 @@ async function getImbankRate(currency: string = 'USD'): Promise<RateData | null>
     if (response.status !== 200) return null;
 
     const $ = cheerio.load(response.data);
-    const allText = $.text();
+    const allText = $('body').text();
 
     // 고시 시간 추출
     let rateTime = '';
@@ -845,7 +845,7 @@ async function getNhRate(currency: string = 'USD'): Promise<RateData | null> {
     if (response.status !== 200) return null;
 
     const $ = cheerio.load(response.data);
-    const allText = $.text();
+    const allText = $('body').text();
 
     // 고시 시간 추출
     let rateTime = '';
