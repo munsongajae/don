@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Fly.io 배포를 위한 standalone 모드 (Docker 이미지 크기 최적화)
+  // 오라클 클라우드 배포 시에도 사용 가능
+  output: process.env.FLY_DEPLOY || process.env.ORACLE_CLOUD_DEPLOY ? 'standalone' : undefined,
   images: {
     domains: [],
     unoptimized: true, // Capacitor를 위해 이미지 최적화 비활성화
@@ -57,4 +60,3 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
-
