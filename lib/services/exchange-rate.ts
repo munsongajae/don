@@ -215,67 +215,116 @@ export async function fetchInvestingJpyKrwRate(): Promise<number | null> {
     return cache.investingJpy.data;
   }
 
-  try {
-    const response = await axios.get(INVESTING_EXCHANGE_RATES_TABLE_URL, {
-      timeout: 7000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1',
-        'Cache-Control': 'max-age=0',
-        'Referer': 'https://kr.investing.com/',
-      },
-    });
+  // Cloudflare 우회를 위한 최적화된 헤더 세트
+  const headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
+    'Referer': 'https://kr.investing.com/',
+    'DNT': '1',
+  };
+
+  // 재시도 로직 (최대 3회)
+  const maxRetries = 3;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // 재시도 간 딜레이 (첫 시도 제외)
+      if (attempt > 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // 2초, 3초 딜레이
+      }
+
+      const response = await axios.get(INVESTING_EXCHANGE_RATES_TABLE_URL, {
+        headers,
+        timeout: 15000,
+        maxRedirects: 5,
+        validateStatus: (status) => status < 500, // 5xx 에러만 throw
+      });
+
+      // Cloudflare 보호 페이지 체크
+      if (response.data && typeof response.data === 'string' && response.data.includes('Just a moment')) {
+        console.warn(`[fetchInvestingJpyKrwRate] Cloudflare 보호 페이지 감지 (시도 ${attempt}/${maxRetries})`);
+        if (attempt < maxRetries) {
+          continue; // 재시도
+        }
+        return null;
+      }
+
+      if (response.status !== 200) {
+        if (attempt < maxRetries) {
+          continue; // 재시도
+        }
+        return null;
+      }
     
-    const $ = cheerio.load(response.data);
-    // 원본 셀렉터: td#last_2_28 (find("td", {"id": "last_2_28"}))
-    const cell = $('td#last_2_28').first();
-    if (cell.length === 0) {
-      // 디버깅: HTML에서 관련 텍스트 검색
-      const htmlContent = response.data;
-      if (htmlContent.includes('last_2_28')) {
-        console.warn('인베스팅닷컴 JPY/KRW: last_2_28은 존재하지만 셀렉터로 찾을 수 없습니다.');
-      } else {
-        console.warn('인베스팅닷컴 JPY/KRW: last_2_28을 찾을 수 없습니다. HTML 길이:', htmlContent.length);
+      const $ = cheerio.load(response.data);
+      // 원본 셀렉터: td#last_2_28 (find("td", {"id": "last_2_28"}))
+      const cell = $('td#last_2_28').first();
+      if (cell.length === 0) {
+        // 디버깅: HTML에서 관련 텍스트 검색
+        const htmlContent = response.data;
+        if (htmlContent.includes('last_2_28')) {
+          console.warn('인베스팅닷컴 JPY/KRW: last_2_28은 존재하지만 셀렉터로 찾을 수 없습니다.');
+        } else {
+          console.warn('인베스팅닷컴 JPY/KRW: last_2_28을 찾을 수 없습니다. HTML 길이:', htmlContent.length);
+        }
+        if (attempt < maxRetries) {
+          continue; // 재시도
+        }
+        return null;
+      }
+      
+      const text = cell.text().trim();
+      // 원본과 동일: 쉼표, "원" 제거
+      const num = text.replace(/,/g, '').replace('원', '').trim();
+      const rate = num ? parseFloat(num) : null;
+      
+      // 원본과 동일: 유효성 검사 없이 바로 반환
+      if (rate && !isNaN(rate)) {
+        cache.investingJpy = { data: rate, time: Date.now() };
+        console.log('인베스팅닷컴 JPY/KRW 조회 성공:', rate);
+        return rate;
+      }
+      
+      console.warn('인베스팅닷컴 JPY/KRW 파싱 실패:', {
+        text,
+        num,
+        rate,
+        cellHtml: cell.html()?.substring(0, 100),
+      });
+      
+      if (attempt < maxRetries) {
+        continue; // 재시도
       }
       return null;
+    } catch (error: any) {
+      // 403 에러인 경우 재시도
+      if (error?.response?.status === 403 && attempt < maxRetries) {
+        console.warn(`[fetchInvestingJpyKrwRate] 403 에러 (시도 ${attempt}/${maxRetries}), 재시도 중...`);
+        continue;
+      }
+
+      // 마지막 시도에서만 에러 로깅
+      if (attempt === maxRetries) {
+        console.error('인베스팅닷컴 JPY/KRW 조회 실패 (3회 시도 후):', {
+          message: error?.message,
+          status: error?.response?.status,
+          statusText: error?.response?.statusText,
+          data: error?.response?.data?.substring?.(0, 200),
+        });
+      }
     }
-    
-    const text = cell.text().trim();
-    // 원본과 동일: 쉼표, "원" 제거
-    const num = text.replace(/,/g, '').replace('원', '').trim();
-    const rate = num ? parseFloat(num) : null;
-    
-    // 원본과 동일: 유효성 검사 없이 바로 반환
-    if (rate && !isNaN(rate)) {
-      cache.investingJpy = { data: rate, time: Date.now() };
-      console.log('인베스팅닷컴 JPY/KRW 조회 성공:', rate);
-      return rate;
-    }
-    
-    console.warn('인베스팅닷컴 JPY/KRW 파싱 실패:', {
-      text,
-      num,
-      rate,
-      cellHtml: cell.html()?.substring(0, 100),
-    });
-    return null;
-  } catch (error: any) {
-    console.error('인베스팅닷컴 JPY/KRW 조회 실패:', {
-      message: error?.message,
-      status: error?.response?.status,
-      statusText: error?.response?.statusText,
-      data: error?.response?.data?.substring?.(0, 200),
-    });
-    return null;
   }
+
+  return null;
 }
 
 /**
@@ -307,4 +356,3 @@ export async function fetchCurrentRates() {
     investingJpy: investingJpyValue || 0,
   };
 }
-
