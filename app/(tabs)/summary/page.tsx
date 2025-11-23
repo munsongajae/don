@@ -582,8 +582,8 @@ export default function SummaryPage() {
               Investing {new Date().toLocaleString('ko-KR')}
             </div>
             <div className="text-2xl sm:text-3xl font-bold">
-              {/* currentRates.investingJpy는 1엔당이므로 100엔당으로 변환 */}
-              {(currentRates.investingJpy * 100).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {/* currentRates.investingJpy는 이미 100엔당으로 변환된 값 */}
+              {currentRates.investingJpy.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
           </div>
         )}
@@ -620,8 +620,8 @@ export default function SummaryPage() {
                   );
                 }
 
-                // 분석탭과 동일한 데이터 소스 사용 (currentRates.investingJpy, 100엔 기준으로 변환)
-                const investingRate = currentRates?.investingJpy ? currentRates.investingJpy * 100 : null;
+                // 분석탭과 동일한 데이터 소스 사용 (currentRates.investingJpy는 이미 100엔 기준으로 변환됨)
+                const investingRate = currentRates?.investingJpy || null;
                 const gap = investingRate ? investingRate - data.rate : null;
                 const gapStr = gap !== null ? `${gap >= 0 ? '+' : ''}${gap.toFixed(2)}` : 'N/A';
 
