@@ -209,6 +209,7 @@ export async function fetchInvestingUsdKrwRate(): Promise<number | null> {
 /**
  * 인베스팅닷컴에서 JPY/KRW 환율을 가져옵니다.
  * 원본: 환율 테이블 페이지에서 파싱 (td#last_2_28)
+ * Investing.com의 last_2_28은 1엔당이므로 100엔당으로 변환하여 반환
  */
 export async function fetchInvestingJpyKrwRate(): Promise<number | null> {
   if (isCacheValid(cache.investingJpy)) {
@@ -288,10 +289,12 @@ export async function fetchInvestingJpyKrwRate(): Promise<number | null> {
       const rate = num ? parseFloat(num) : null;
       
       // 원본과 동일: 유효성 검사 없이 바로 반환
+      // Investing.com의 last_2_28은 1엔당이므로 100엔당으로 변환
       if (rate && !isNaN(rate)) {
-        cache.investingJpy = { data: rate, time: Date.now() };
-        console.log('인베스팅닷컴 JPY/KRW 조회 성공:', rate);
-        return rate;
+        const rate100 = rate * 100; // 100엔당으로 변환
+        cache.investingJpy = { data: rate100, time: Date.now() };
+        console.log('인베스팅닷컴 JPY/KRW 조회 성공 (100엔당):', rate100);
+        return rate100;
       }
       
       console.warn('인베스팅닷컴 JPY/KRW 파싱 실패:', {
