@@ -22,11 +22,16 @@ export async function GET(request: NextRequest) {
       successfulBanks: Object.values(rates).filter(r => r !== null).length,
       investingRate: rates.INVESTING?.rate,
     });
-    return corsResponse(rates);
+    const response = corsResponse(rates);
+    // Vercel CDN 캐시 비활성화 (실시간 데이터이므로)
+    response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    return response;
   } catch (error) {
     console.error(`[Bank Rates API] Error fetching bank rates for ${currency}:`, error);
     console.error(`[Bank Rates API] Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
-    return corsResponse(
+    const response = corsResponse(
       { 
         error: 'Failed to fetch bank rates',
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -34,6 +39,11 @@ export async function GET(request: NextRequest) {
       },
       500
     );
+    // 에러 응답도 캐시하지 않음
+    response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    return response;
   }
 }
 

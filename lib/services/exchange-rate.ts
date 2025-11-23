@@ -122,88 +122,138 @@ export async function fetchHanaUsdKrwRate(): Promise<number | null> {
 /**
  * 인베스팅닷컴에서 USD/KRW 환율을 가져옵니다.
  * 원본: 환율 테이블 페이지에서 파싱 (td.pid-650-last#last_12_28)
+ * Vercel 환경 대응: 재시도 로직 및 Cloudflare 우회 헤더 추가
  */
 export async function fetchInvestingUsdKrwRate(): Promise<number | null> {
   if (isCacheValid(cache.investingUsd)) {
     return cache.investingUsd.data;
   }
 
-  try {
-    const response = await axios.get(INVESTING_EXCHANGE_RATES_TABLE_URL, {
-      timeout: 7000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1',
-        'Cache-Control': 'max-age=0',
-        'Referer': 'https://kr.investing.com/',
-      },
-    });
-    
-    // 원본과 동일: find("td", {"class": "pid-650-last", "id": "last_12_28"})
-    // BeautifulSoup의 find는 class와 id를 모두 만족하는 요소를 찾음
-    const $ = cheerio.load(response.data);
-    
-    // 원본 Python 코드와 동일: class="pid-650-last" AND id="last_12_28"
-    // Cheerio에서 속성을 모두 만족하는 요소 찾기
-    let cell = $('td.pid-650-last[id="last_12_28"]').first();
-    if (cell.length === 0) {
-      // 대체: 다른 방법으로 시도
-      cell = $('td#last_12_28.pid-650-last').first();
-    }
-    if (cell.length === 0) {
-      // 대체: id만으로 찾기
-      cell = $('td#last_12_28').first();
-    }
-    if (cell.length === 0) {
-      // 디버깅: HTML에서 관련 텍스트 검색
-      const htmlContent = response.data;
-      const hasLast1228 = htmlContent.includes('last_12_28');
-      const hasPid650 = htmlContent.includes('pid-650');
-      console.warn('인베스팅닷컴 USD/KRW 셀렉터 실패:', {
-        hasLast1228,
-        hasPid650,
-        htmlLength: htmlContent.length,
-        statusCode: response.status,
+  // Cloudflare 우회를 위한 최적화된 헤더 세트 (JPY와 동일)
+  const headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
+    'Referer': 'https://kr.investing.com/',
+    'DNT': '1',
+  };
+
+  // 재시도 로직 (최대 3회)
+  const maxRetries = 3;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // 재시도 간 딜레이 (첫 시도 제외)
+      if (attempt > 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // 2초, 3초 딜레이
+      }
+
+      const response = await axios.get(INVESTING_EXCHANGE_RATES_TABLE_URL, {
+        headers,
+        timeout: 10000, // Vercel 무료 플랜 제한을 고려하여 10초로 설정
+        maxRedirects: 5,
+        validateStatus: (status) => status < 500, // 5xx 에러만 throw
       });
+
+      // Cloudflare 보호 페이지 체크
+      if (response.data && typeof response.data === 'string' && response.data.includes('Just a moment')) {
+        console.warn(`[fetchInvestingUsdKrwRate] Cloudflare 보호 페이지 감지 (시도 ${attempt}/${maxRetries})`);
+        if (attempt < maxRetries) {
+          continue; // 재시도
+        }
+        return null;
+      }
+
+      if (response.status !== 200) {
+        if (attempt < maxRetries) {
+          continue; // 재시도
+        }
+        return null;
+      }
+    
+      // 원본과 동일: find("td", {"class": "pid-650-last", "id": "last_12_28"})
+      // BeautifulSoup의 find는 class와 id를 모두 만족하는 요소를 찾음
+      const $ = cheerio.load(response.data);
+      
+      // 원본 Python 코드와 동일: class="pid-650-last" AND id="last_12_28"
+      // Cheerio에서 속성을 모두 만족하는 요소 찾기
+      let cell = $('td.pid-650-last[id="last_12_28"]').first();
+      if (cell.length === 0) {
+        // 대체: 다른 방법으로 시도
+        cell = $('td#last_12_28.pid-650-last').first();
+      }
+      if (cell.length === 0) {
+        // 대체: id만으로 찾기
+        cell = $('td#last_12_28').first();
+      }
+      if (cell.length === 0) {
+        // 디버깅: HTML에서 관련 텍스트 검색
+        const htmlContent = response.data;
+        const hasLast1228 = htmlContent.includes('last_12_28');
+        const hasPid650 = htmlContent.includes('pid-650');
+        console.warn(`[fetchInvestingUsdKrwRate] 셀렉터 실패 (시도 ${attempt}/${maxRetries}):`, {
+          hasLast1228,
+          hasPid650,
+          htmlLength: htmlContent.length,
+          statusCode: response.status,
+        });
+        if (attempt < maxRetries) {
+          continue; // 재시도
+        }
+        return null;
+      }
+      
+      const text = cell.text().trim();
+      // 원본과 동일: 쉼표, "원" 제거
+      const num = text.replace(/,/g, '').replace('원', '').trim();
+      const rate = num ? parseFloat(num) : null;
+      
+      // 원본과 동일: 유효성 검사 없이 바로 반환 (원본은 검사하지 않음)
+      if (rate && !isNaN(rate)) {
+        cache.investingUsd = { data: rate, time: Date.now() };
+        console.log('인베스팅닷컴 USD/KRW 조회 성공:', rate);
+        return rate;
+      }
+      
+      console.warn(`[fetchInvestingUsdKrwRate] 파싱 실패 (시도 ${attempt}/${maxRetries}):`, {
+        text,
+        num,
+        rate,
+        cellHtml: cell.html()?.substring(0, 100),
+      });
+      
+      if (attempt < maxRetries) {
+        continue; // 재시도
+      }
       return null;
+    } catch (error: any) {
+      // 403 에러인 경우 재시도
+      if (error?.response?.status === 403 && attempt < maxRetries) {
+        console.warn(`[fetchInvestingUsdKrwRate] 403 에러 (시도 ${attempt}/${maxRetries}), 재시도 중...`);
+        continue;
+      }
+
+      // 마지막 시도에서만 에러 로깅
+      if (attempt === maxRetries) {
+        console.error('인베스팅닷컴 USD/KRW 조회 실패 (3회 시도 후):', {
+          message: error?.message,
+          status: error?.response?.status,
+          statusText: error?.response?.statusText,
+          data: error?.response?.data?.substring?.(0, 200),
+        });
+      }
     }
-    
-    const text = cell.text().trim();
-    // 원본과 동일: 쉼표, "원" 제거
-    const num = text.replace(/,/g, '').replace('원', '').trim();
-    const rate = num ? parseFloat(num) : null;
-    
-    // 원본과 동일: 유효성 검사 없이 바로 반환 (원본은 검사하지 않음)
-    if (rate && !isNaN(rate)) {
-      cache.investingUsd = { data: rate, time: Date.now() };
-      console.log('인베스팅닷컴 USD/KRW 조회 성공:', rate);
-      return rate;
-    }
-    
-    console.warn('인베스팅닷컴 USD/KRW 파싱 실패:', {
-      text,
-      num,
-      rate,
-      cellHtml: cell.html()?.substring(0, 100),
-    });
-    return null;
-  } catch (error: any) {
-    console.error('인베스팅닷컴 USD/KRW 조회 실패:', {
-      message: error?.message,
-      status: error?.response?.status,
-      statusText: error?.response?.statusText,
-      data: error?.response?.data?.substring?.(0, 200),
-    });
-    return null;
   }
+
+  return null;
 }
 
 /**
@@ -245,7 +295,7 @@ export async function fetchInvestingJpyKrwRate(): Promise<number | null> {
 
       const response = await axios.get(INVESTING_EXCHANGE_RATES_TABLE_URL, {
         headers,
-        timeout: 15000,
+        timeout: 10000, // Vercel 무료 플랜 제한을 고려하여 10초로 설정
         maxRedirects: 5,
         validateStatus: (status) => status < 500, // 5xx 에러만 throw
       });
@@ -359,3 +409,4 @@ export async function fetchCurrentRates() {
     investingJpy: investingJpyValue || 0,
   };
 }
+
