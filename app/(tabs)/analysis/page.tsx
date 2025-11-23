@@ -171,8 +171,16 @@ export default function AnalysisPage() {
         const jpyKrwHigh = Math.max(...jpyKrwHighArray);
         const jpyKrwLow = Math.min(...jpyKrwLowArray);
         const jpyKrwMid = (jpyKrwHigh + jpyKrwLow) / 2;
-        // 종합 탭과 동일한 데이터 소스 사용 (currentRates 우선), 1엔당이지만 표시는 100엔당으로 변환
-        const currentJpyKrw = data.currentRates.investingJpy || currentPrices.JPY_KRW || 0;
+        // 종합 탭과 동일한 데이터 소스 사용 (currentRates 우선)
+        // currentRates.investingJpy는 이미 100엔당으로 변환된 값
+        // currentPrices.JPY_KRW는 1엔당이므로 100을 곱해야 함
+        let currentJpyKrw = data.currentRates.investingJpy || 0;
+        if (currentJpyKrw === 0 && currentPrices.JPY_KRW) {
+          currentJpyKrw = currentPrices.JPY_KRW * 100; // 1엔당을 100엔당으로 변환
+        }
+
+        // jpyKrwMid는 1엔당이므로 100엔당으로 변환
+        const jpyKrwMid100 = jpyKrwMid * 100;
 
         if (currentJpyKrw === 0 || jpyKrwMid === 0) {
           console.warn('JPY/KRW 현재값 또는 중간값이 0입니다.', {
@@ -185,18 +193,17 @@ export default function AnalysisPage() {
           return;
         }
 
-        const jpyKrwSignal = calculateIndicatorSignal(currentJpyKrw, jpyKrwMid, true);
+        const jpyKrwSignal = calculateIndicatorSignal(currentJpyKrw, jpyKrwMid100, true);
 
         // 원본과 동일: 엔화 갭 비율 (100엔당 기준)
-        const currentJpyGapRatio = (currentJxy * 100) / (currentJpyKrw * 100);
-        const midJpyGapRatio = (jxyMid * 100) / (jpyKrwMid * 100);
+        const currentJpyGapRatio = (currentJxy * 100) / currentJpyKrw;
+        const midJpyGapRatio = (jxyMid * 100) / jpyKrwMid100;
         const jpyGapRatioSignal = calculateIndicatorSignal(currentJpyGapRatio, midJpyGapRatio, false);
 
         // 원본과 동일: 엔화 적정 환율 (100엔당 기준)
-        const midJpyGapRatioRaw = jxyMid / jpyKrwMid;
-        const jpyFairExchangeRate = (currentJxy / midJpyGapRatioRaw) * 100;
-        const currentJpyKrw100 = currentJpyKrw * 100; // 100엔당
-        const jpyFairRateSignal = calculateIndicatorSignal(currentJpyKrw100, jpyFairExchangeRate, true);
+        const midJpyGapRatioRaw = (jxyMid * 100) / jpyKrwMid100;
+        const jpyFairExchangeRate = (currentJxy * 100) / midJpyGapRatioRaw;
+        const jpyFairRateSignal = calculateIndicatorSignal(currentJpyKrw, jpyFairExchangeRate, true);
 
         // 차트 데이터 (원본과 동일: dates와 시리즈 매핑, 100엔당으로 변환)
         const jpyKrwChartData = data.dates.map((date: string, i: number) => ({
@@ -214,10 +221,10 @@ export default function AnalysisPage() {
             series: jxySeries,
           },
           jpyKrw: {
-            current: currentJpyKrw * 100, // 100엔당
-            high: jpyKrwHigh * 100,
-            low: jpyKrwLow * 100,
-            mid: jpyKrwMid * 100,
+            current: currentJpyKrw, // 이미 100엔당
+            high: jpyKrwHigh * 100, // 1엔당을 100엔당으로 변환
+            low: jpyKrwLow * 100, // 1엔당을 100엔당으로 변환
+            mid: jpyKrwMid100, // 이미 변환됨
             signal: jpyKrwSignal,
             series: (data.close.JPY_KRW || []).map(v => v * 100), // 100엔당
           },
@@ -227,7 +234,7 @@ export default function AnalysisPage() {
             signal: jpyGapRatioSignal,
           },
           jpyFairRate: {
-            current: currentJpyKrw100,
+            current: currentJpyKrw, // 이미 100엔당
             fair: jpyFairExchangeRate,
             signal: jpyFairRateSignal,
           },
