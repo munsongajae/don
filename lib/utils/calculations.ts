@@ -106,19 +106,21 @@ export function calculateIndicatorSignals(
   const fairRateSignal: 'O' | 'X' | '-' = currentUsdKrw < fairExchangeRate ? 'O' : (currentUsdKrw > fairExchangeRate ? 'X' : '-');
   
   // 엔화 지표
+  // currentJpyKrw와 jpyKrw52wMid는 모두 100엔당 값으로 전달됨
   const jxySignal: 'O' | 'X' | '-' = currentJxy < jxy52wMid ? 'O' : (currentJxy > jxy52wMid ? 'X' : '-');
   const jpyKrwSignal: 'O' | 'X' | '-' = currentJpyKrw < jpyKrw52wMid ? 'O' : (currentJpyKrw > jpyKrw52wMid ? 'X' : '-');
   
   // 엔화 갭 비율 (100엔당 기준)
-  const currentJpyGapRatio = (currentJxy * 100) / (currentJpyKrw * 100);
-  const midJpyGapRatio = (jxy52wMid * 100) / (jpyKrw52wMid * 100);
+  // currentJpyKrw와 jpyKrw52wMid는 이미 100엔당이므로 100을 곱하지 않음
+  const currentJpyGapRatio = (currentJxy * 100) / currentJpyKrw;
+  const midJpyGapRatio = (jxy52wMid * 100) / jpyKrw52wMid;
   const jpyGapRatioSignal: 'O' | 'X' | '-' = currentJpyGapRatio > midJpyGapRatio ? 'O' : (currentJpyGapRatio < midJpyGapRatio ? 'X' : '-');
   
   // 엔화 적정 환율 (100엔당 기준)
-  const midJpyGapRatioRaw = jxy52wMid / jpyKrw52wMid;
-  const jpyFairExchangeRate = (currentJxy / midJpyGapRatioRaw) * 100;
-  const currentJpyKrw100 = currentJpyKrw * 100;
-  const jpyFairRateSignal: 'O' | 'X' | '-' = currentJpyKrw100 < jpyFairExchangeRate ? 'O' : (currentJpyKrw100 > jpyFairExchangeRate ? 'X' : '-');
+  // currentJpyKrw는 이미 100엔당이므로 100을 곱하지 않음
+  const midJpyGapRatioRaw = (jxy52wMid * 100) / jpyKrw52wMid;
+  const jpyFairExchangeRate = (currentJxy * 100) / midJpyGapRatioRaw;
+  const jpyFairRateSignal: 'O' | 'X' | '-' = currentJpyKrw < jpyFairExchangeRate ? 'O' : (currentJpyKrw > jpyFairExchangeRate ? 'X' : '-');
   
   return {
     dxy: dxySignal,
