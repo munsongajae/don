@@ -151,9 +151,14 @@ export async function fetchInvestingUsdKrwRate(): Promise<number | null> {
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      // 재시도 간 딜레이 (첫 시도 제외)
-      if (attempt > 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // 2초, 3초 딜레이
+      // 첫 시도 전에도 약간의 랜덤 딜레이 (0.5~1.5초) - Cloudflare 우회를 위해
+      if (attempt === 1) {
+        const initialDelay = 500 + Math.random() * 1000; // 0.5~1.5초 랜덤
+        await new Promise(resolve => setTimeout(resolve, initialDelay));
+      } else {
+        // 재시도 간 딜레이 증가 (3초, 5초, 8초)
+        const delay = 2000 + (attempt - 1) * 2000; // 3초, 5초, 8초
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
 
       const response = await axios.get(INVESTING_EXCHANGE_RATES_TABLE_URL, {
@@ -288,9 +293,14 @@ export async function fetchInvestingJpyKrwRate(): Promise<number | null> {
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      // 재시도 간 딜레이 (첫 시도 제외)
-      if (attempt > 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // 2초, 3초 딜레이
+      // 첫 시도 전에도 약간의 랜덤 딜레이 (0.5~1.5초) - Cloudflare 우회를 위해
+      if (attempt === 1) {
+        const initialDelay = 500 + Math.random() * 1000; // 0.5~1.5초 랜덤
+        await new Promise(resolve => setTimeout(resolve, initialDelay));
+      } else {
+        // 재시도 간 딜레이 증가 (3초, 5초, 8초)
+        const delay = 2000 + (attempt - 1) * 2000; // 3초, 5초, 8초
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
 
       const response = await axios.get(INVESTING_EXCHANGE_RATES_TABLE_URL, {
