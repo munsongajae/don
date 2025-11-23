@@ -175,8 +175,8 @@ export async function loadJpySellRecords(userId?: string): Promise<JpySellRecord
       sell_krw: item.sell_krw != null ? Number(item.sell_krw) : 0,
       exchange_rate: item.sell_rate != null ? Number(item.sell_rate) : 0, // sell_rate를 exchange_rate로 매핑
       profit_loss: item.profit_krw != null ? Number(item.profit_krw) : 0, // profit_krw를 profit_loss로 매핑
-      profit_rate: item.profit_rate != null ? Number(item.profit_rate) : 0,
-      sell_number: item.sell_number,
+      profit_rate: 0, // profit_rate는 스키마에 없으므로 0으로 설정
+      sell_number: undefined, // sell_number는 스키마에 없으므로 undefined
       created_at: item.created_at || '',
     }));
   } catch (error) {
@@ -211,34 +211,12 @@ export async function saveJpySellRecord(
       }
     }
 
-    // 매도 번호 결정: 사용자가 제공한 번호 또는 자동 생성
-    let sellNumber: number;
-    if (providedSellNumber && providedSellNumber > 0) {
-      sellNumber = providedSellNumber;
-    } else {
-      // 매도 번호 자동 생성: 사용자별 최대값 + 1
-      let query = supabase
-        .from('jpy_sell_records')
-        .select('sell_number')
-        .order('sell_number', { ascending: false })
-        .limit(1);
-      
-      if (userId) {
-        query = query.eq('user_id', userId);
-      }
-      
-      const { data: maxDataList } = await query;
-      const maxSellNumber = maxDataList && maxDataList.length > 0
-        ? maxDataList[0]?.sell_number || 0
-        : 0;
-      sellNumber = maxSellNumber + 1;
-    }
+    // 매도 번호는 스키마에 없으므로 저장하지 않음 (필요시 나중에 추가 가능)
 
     // user_id 추가 및 필드명 매핑 (코드 필드명 → DB 필드명)
     const recordData: any = {
       investment_id: record.investment_id,
       investment_number: investmentNumber,
-      sell_number: sellNumber,
       sell_date: record.sell_date,
       sell_amount: (record as any).jpy_amount || 0, // jpy_amount를 sell_amount로 매핑
       sell_krw: record.sell_krw,
@@ -270,8 +248,8 @@ export async function saveJpySellRecord(
       sell_krw: data.sell_krw != null ? Number(data.sell_krw) : 0,
       exchange_rate: data.sell_rate != null ? Number(data.sell_rate) : 0, // sell_rate를 exchange_rate로 매핑
       profit_loss: data.profit_krw != null ? Number(data.profit_krw) : 0, // profit_krw를 profit_loss로 매핑
-      profit_rate: data.profit_rate != null ? Number(data.profit_rate) : 0,
-      sell_number: data.sell_number,
+      profit_rate: 0, // profit_rate는 계산된 값이므로 0으로 설정 (스키마에 없음)
+      sell_number: (record as any).sell_number || undefined, // sell_number는 스키마에 없으므로 원본 데이터에서 가져옴
       created_at: data.created_at,
     };
   } catch (error) {
