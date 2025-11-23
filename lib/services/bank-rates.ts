@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { fetchInvestingUsdKrwRate, fetchInvestingJpyKrwRate } from './exchange-rate';
 
 interface RateData {
   bank: string;
@@ -1123,7 +1124,41 @@ export async function getAllBankRates(currency: string = 'USD'): Promise<{
     result.status === 'fulfilled' ? result.value : null
   );
 
-  const successfulCount = results.filter(r => r.status === 'fulfilled' && r.value !== null).length;
+  // bank-rates의 getInvestingRate가 실패하면 exchange-rate.ts의 함수를 fallback으로 사용
+  let finalInvestingResult = investingResult;
+  if (!investingResult) {
+    console.log(`[getAllBankRates] Trying fallback INVESTING fetch for ${upperCurrency}...`);
+    try {
+      let rate: number | null = null;
+      if (upperCurrency === 'USD') {
+        rate = await fetchInvestingUsdKrwRate();
+      } else if (upperCurrency === 'JPY') {
+        rate = await fetchInvestingJpyKrwRate();
+      }
+      
+      if (rate && rate > 0) {
+        const now = new Date();
+        const rateTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        const dateStr = formatDate(now);
+        
+        // JPY는 1엔 기준이므로 100엔 기준으로 변환
+        const finalRate = upperCurrency === 'JPY' ? rate * 100 : rate;
+        
+        console.log(`[getAllBankRates] Fallback INVESTING fetch succeeded for ${upperCurrency}:`, finalRate);
+        finalInvestingResult = {
+          bank: 'INVESTING',
+          rate: finalRate,
+          time: normalizeTime(rateTime),
+          date: dateStr,
+          currency: upperCurrency,
+        };
+      }
+    } catch (fallbackError) {
+      console.error(`[getAllBankRates] Fallback INVESTING fetch failed for ${upperCurrency}:`, fallbackError);
+    }
+  }
+
+  const successfulCount = results.filter(r => r.status === 'fulfilled' && r.value !== null).length + (finalInvestingResult ? 1 : 0);
   console.log(`[getAllBankRates] Completed for ${upperCurrency}: ${successfulCount}/10 banks succeeded`);
 
   return {
@@ -1136,6 +1171,6 @@ export async function getAllBankRates(currency: string = 'USD'): Promise<{
     BUSAN: busanResult,
     IMBANK: imbankResult,
     NH: nhResult,
-    INVESTING: investingResult,
+    INVESTING: finalInvestingResult,
   };
 }
