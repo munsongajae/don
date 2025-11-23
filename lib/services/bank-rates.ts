@@ -939,10 +939,10 @@ async function getInvestingRate(currency: string = 'USD'): Promise<RateData | nu
         rateStr = krwCell.text().trim().replace(/,/g, '');
       }
     } else if (upperCurrency === 'JPY') {
-      const row = $('#pair_2');
-      if (row.length) {
-        const krwCell = row.find('td').last();
-        rateStr = krwCell.text().trim().replace(/,/g, '');
+      // fetchInvestingJpyKrwRate()와 동일한 셀렉터 사용 (td#last_2_28)
+      const cell = $('td#last_2_28').first();
+      if (cell.length) {
+        rateStr = cell.text().trim().replace(/,/g, '').replace('원', '').trim();
       }
     } else {
       return null;
