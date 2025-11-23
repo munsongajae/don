@@ -10,8 +10,7 @@ async function getYahooFinance() {
     // 서버 사이드에서만 동적으로 import
     if (typeof window === 'undefined') {
       yahooFinance = (await import('yahoo-finance2')).default;
-      // deprecation 경고 억제
-      yf = new yahooFinance({ suppressNotices: ['ripHistorical'] });
+      yf = new yahooFinance();
     } else {
       throw new Error('yahoo-finance2는 서버 사이드에서만 사용할 수 있습니다.');
     }
@@ -25,6 +24,8 @@ async function getYahooFinance() {
  * 
  * 참고: yahoo-finance2는 historical 모듈이 없을 수 있으므로,
  * chart 모듈이나 다른 방법을 사용해야 할 수 있습니다.
+ * 
+ * 주의: historical()은 deprecated되었지만, chart()로 마이그레이션 전까지 사용합니다.
  */
 export async function fetchPeriodData(periodMonths: number = 12): Promise<PeriodData> {
   const allTickers = Object.values(DXY_TICKERS).concat([USD_KRW_TICKER]);
@@ -47,74 +48,21 @@ export async function fetchPeriodData(periodMonths: number = 12): Promise<Period
   await Promise.allSettled(
     allTickers.map(async (ticker) => {
       try {
-        // chart 모듈 사용 (historical은 deprecated)
-        const chartData = await yfInstance.chart(ticker, {
+        // historical 모듈 사용 (원본 Python의 yf.download()와 유사)
+        const quotes = await yfInstance.historical(ticker, {
           period1: startDate, // Date 객체 또는 ISO 문자열
           period2: endDate,
           interval: '1d' as const, // 일별 데이터
+          events: 'history' as const, // 가격 데이터
         });
         
-        // 디버깅: 응답 구조 확인
-        console.log(`[${ticker}] chart() 응답 구조:`, {
-          hasResult: !!chartData?.result,
-          resultLength: chartData?.result?.length || 0,
-          hasFirstResult: !!chartData?.result?.[0],
-          firstResultKeys: chartData?.result?.[0] ? Object.keys(chartData.result[0]) : [],
-        });
-        
-        // chart() API 응답 구조: { result: [{ timestamp: [...], indicators: { quote: [{ open: [...], high: [...], ... }] } }] }
-        const result = chartData?.result?.[0];
-        const timestamps = result?.timestamp || [];
-        const quoteData = result?.indicators?.quote?.[0];
-        
-        if (!quoteData || !timestamps || timestamps.length === 0) {
-          // Fallback: historical()과 유사한 구조일 수도 있음
-          if (Array.isArray(chartData) && chartData.length > 0) {
-            // 배열로 직접 반환된 경우
-            const convertedQuotes = chartData.map((item: any) => {
-              if (item.date) {
-                return {
-                  date: item.date instanceof Date ? item.date : new Date(item.date),
-                  open: item.open || 0,
-                  high: item.high || 0,
-                  low: item.low || 0,
-                  close: item.close || 0,
-                  volume: item.volume || 0,
-                };
-              }
-              return item;
-            });
-            tickerData[ticker] = convertedQuotes;
-            console.log(`티커 ${ticker} 데이터 가져오기 성공 (fallback 배열): ${convertedQuotes.length}개 데이터 포인트`);
-            return;
-          }
-          
-          console.warn(`티커 ${ticker} 데이터가 비어있습니다.`, {
-            hasResult: !!result,
-            hasTimestamps: !!timestamps,
-            timestampsLength: timestamps?.length || 0,
-            hasQuoteData: !!quoteData,
-            chartDataType: Array.isArray(chartData) ? 'array' : typeof chartData,
-            chartDataKeys: chartData && typeof chartData === 'object' ? Object.keys(chartData) : [],
-          });
+        if (quotes && Array.isArray(quotes) && quotes.length > 0) {
+          tickerData[ticker] = quotes;
+          console.log(`티커 ${ticker} 데이터 가져오기 성공: ${quotes.length}개 데이터 포인트`);
+        } else {
+          console.warn(`티커 ${ticker} 데이터가 비어있습니다.`);
           tickerData[ticker] = [];
-          return;
         }
-        
-        // timestamp 배열과 각 필드 배열을 객체 배열로 변환
-        const convertedQuotes = timestamps.map((timestamp: number, index: number) => {
-          return {
-            date: new Date(timestamp * 1000), // Unix timestamp를 Date로 변환
-            open: quoteData.open?.[index] || 0,
-            high: quoteData.high?.[index] || 0,
-            low: quoteData.low?.[index] || 0,
-            close: quoteData.close?.[index] || 0,
-            volume: quoteData.volume?.[index] || 0,
-          };
-        });
-        
-        tickerData[ticker] = convertedQuotes;
-        console.log(`티커 ${ticker} 데이터 가져오기 성공: ${convertedQuotes.length}개 데이터 포인트`);
       } catch (error: any) {
         console.error(`티커 ${ticker} 데이터 가져오기 실패:`, {
           message: error?.message,
