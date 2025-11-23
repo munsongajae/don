@@ -10,7 +10,8 @@ async function getYahooFinance() {
     // 서버 사이드에서만 동적으로 import
     if (typeof window === 'undefined') {
       yahooFinance = (await import('yahoo-finance2')).default;
-      yf = new yahooFinance();
+      // deprecation 경고 억제
+      yf = new yahooFinance({ suppressNotices: ['ripHistorical'] });
     } else {
       throw new Error('yahoo-finance2는 서버 사이드에서만 사용할 수 있습니다.');
     }
@@ -46,17 +47,37 @@ export async function fetchPeriodData(periodMonths: number = 12): Promise<Period
   await Promise.allSettled(
     allTickers.map(async (ticker) => {
       try {
-        // historical 모듈 사용 (원본 Python의 yf.download()와 유사)
-        const quotes = await yfInstance.historical(ticker, {
+        // chart 모듈 사용 (historical은 deprecated)
+        const chartData = await yfInstance.chart(ticker, {
           period1: startDate, // Date 객체 또는 ISO 문자열
           period2: endDate,
           interval: '1d' as const, // 일별 데이터
-          events: 'history' as const, // 가격 데이터
         });
         
+        // chart() API는 result 속성 안에 배열을 반환할 수 있음
+        const quotes = chartData?.result?.[0]?.indicators?.quote?.[0] || 
+                       chartData?.result || 
+                       (Array.isArray(chartData) ? chartData : []);
+        
         if (quotes && Array.isArray(quotes) && quotes.length > 0) {
-          tickerData[ticker] = quotes;
-          console.log(`티커 ${ticker} 데이터 가져오기 성공: ${quotes.length}개 데이터 포인트`);
+          // chart API의 응답 구조에 맞게 변환 (timestamp를 date로 변환)
+          const convertedQuotes = quotes.map((quote: any) => {
+            if (quote.timestamp) {
+              return {
+                date: new Date(quote.timestamp * 1000),
+                open: quote.open,
+                high: quote.high,
+                low: quote.low,
+                close: quote.close,
+                volume: quote.volume,
+              };
+            }
+            // 이미 date 속성이 있으면 그대로 사용
+            return quote;
+          });
+          
+          tickerData[ticker] = convertedQuotes;
+          console.log(`티커 ${ticker} 데이터 가져오기 성공: ${convertedQuotes.length}개 데이터 포인트`);
         } else {
           console.warn(`티커 ${ticker} 데이터가 비어있습니다.`);
           tickerData[ticker] = [];
