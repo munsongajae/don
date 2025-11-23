@@ -234,14 +234,14 @@ function InvestmentPageContent() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">투자</h1>
+    <div className="space-y-4 sm:space-y-6 animate-fade-in px-2 sm:px-0">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">투자</h1>
 
       {/* 통화 선택 */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-3 sm:gap-4 mb-4 sm:mb-6">
         <button
           onClick={() => setCurrency('dollar')}
-          className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+          className={`flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-semibold transition-all ${
             currency === 'dollar'
               ? 'bg-toss-blue-500 text-white shadow-lg'
               : 'bg-white text-gray-700 border border-gray-300'
@@ -251,7 +251,7 @@ function InvestmentPageContent() {
         </button>
         <button
           onClick={() => setCurrency('jpy')}
-          className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+          className={`flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-semibold transition-all ${
             currency === 'jpy'
               ? 'bg-toss-blue-500 text-white shadow-lg'
               : 'bg-white text-gray-700 border border-gray-300'
@@ -262,7 +262,7 @@ function InvestmentPageContent() {
       </div>
 
       {/* 포트폴리오 성과 */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <MetricCard
           title="총 매수 금액"
           value={formatKrw(portfolio.totalPurchaseKrw)}
@@ -304,7 +304,7 @@ function InvestmentPageContent() {
 
       {/* 투자 목록 */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">📋 투자 내역</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">📋 투자 내역</h2>
         <InvestmentList
           currency={currency}
           investments={investments.map(inv => {

@@ -262,13 +262,13 @@ export default function SummaryPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in px-2 sm:px-0">
+      <div className="text-center mb-4 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
           환율 투자 관리
         </h1>
         {currentTime && (
-          <p className="text-gray-500">
+          <p className="text-xs sm:text-sm text-gray-500">
             마지막 업데이트: {currentTime}
           </p>
         )}
@@ -276,8 +276,8 @@ export default function SummaryPage() {
 
       {/* 실시간 환율 */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">💱 실시간 환율</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">💱 실시간 환율</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <MetricCard
             title="USD/KRW (인베스팅)"
             value={currentRates ? formatKrwPlain(currentRates.investingUsd) : '로딩 중...'}
@@ -312,16 +312,16 @@ export default function SummaryPage() {
 
       {/* 달러 투자 지표 */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">💵 달러 투자 지표</h2>
-        <div className="bg-white rounded-2xl p-6 shadow-sm overflow-x-auto">
-          <table className="w-full">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">💵 달러 투자 지표</h2>
+        <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm overflow-x-auto">
+          <table className="w-full text-sm sm:text-base">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-900">기간</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-900">달러지수</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-900">원달러환율</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-900">갭 비율</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-900">적정환율</th>
+                <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">기간</th>
+                <th className="text-center py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">달러지수</th>
+                <th className="text-center py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">원달러환율</th>
+                <th className="text-center py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">갭 비율</th>
+                <th className="text-center py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">적정환율</th>
               </tr>
             </thead>
             <tbody>
@@ -329,10 +329,10 @@ export default function SummaryPage() {
                 const periodSignal = signals[period];
                 return (
                   <tr key={period} className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">{periodNames[period]}</td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{periodNames[period]}</td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
                       <span
-                        className={`text-2xl font-bold ${
+                        className={`text-xl sm:text-2xl font-bold ${
                           periodSignal?.dxy === 'O'
                             ? 'text-green-600'
                             : periodSignal?.dxy === 'X'
@@ -343,9 +343,9 @@ export default function SummaryPage() {
                         {periodSignal?.dxy || '-'}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
                       <span
-                        className={`text-2xl font-bold ${
+                        className={`text-xl sm:text-2xl font-bold ${
                           periodSignal?.usd_krw === 'O'
                             ? 'text-green-600'
                             : periodSignal?.usd_krw === 'X'
@@ -356,9 +356,9 @@ export default function SummaryPage() {
                         {periodSignal?.usd_krw || '-'}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
                       <span
-                        className={`text-2xl font-bold ${
+                        className={`text-xl sm:text-2xl font-bold ${
                           periodSignal?.gap_ratio === 'O'
                             ? 'text-green-600'
                             : periodSignal?.gap_ratio === 'X'
@@ -369,9 +369,9 @@ export default function SummaryPage() {
                         {periodSignal?.gap_ratio || '-'}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
                       <span
-                        className={`text-2xl font-bold ${
+                        className={`text-xl sm:text-2xl font-bold ${
                           periodSignal?.fair_rate === 'O'
                             ? 'text-green-600'
                             : periodSignal?.fair_rate === 'X'
@@ -392,16 +392,16 @@ export default function SummaryPage() {
 
       {/* 엔화 투자 지표 */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">💴 엔화 투자 지표</h2>
-        <div className="bg-white rounded-2xl p-6 shadow-sm overflow-x-auto">
-          <table className="w-full">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">💴 엔화 투자 지표</h2>
+        <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm overflow-x-auto">
+          <table className="w-full text-sm sm:text-base">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-900">기간</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-900">엔화지수</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-900">엔화환율</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-900">갭 비율</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-900">적정환율</th>
+                <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">기간</th>
+                <th className="text-center py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">엔화지수</th>
+                <th className="text-center py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">엔화환율</th>
+                <th className="text-center py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">갭 비율</th>
+                <th className="text-center py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">적정환율</th>
               </tr>
             </thead>
             <tbody>
@@ -409,10 +409,10 @@ export default function SummaryPage() {
                 const periodSignal = signals[period];
                 return (
                   <tr key={period} className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">{periodNames[period]}</td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{periodNames[period]}</td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
                       <span
-                        className={`text-2xl font-bold ${
+                        className={`text-xl sm:text-2xl font-bold ${
                           periodSignal?.jxy === 'O'
                             ? 'text-green-600'
                             : periodSignal?.jxy === 'X'
@@ -423,9 +423,9 @@ export default function SummaryPage() {
                         {periodSignal?.jxy || '-'}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
                       <span
-                        className={`text-2xl font-bold ${
+                        className={`text-xl sm:text-2xl font-bold ${
                           periodSignal?.jpy_krw === 'O'
                             ? 'text-green-600'
                             : periodSignal?.jpy_krw === 'X'
@@ -436,9 +436,9 @@ export default function SummaryPage() {
                         {periodSignal?.jpy_krw || '-'}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
                       <span
-                        className={`text-2xl font-bold ${
+                        className={`text-xl sm:text-2xl font-bold ${
                           periodSignal?.jpy_gap_ratio === 'O'
                             ? 'text-green-600'
                             : periodSignal?.jpy_gap_ratio === 'X'
@@ -449,9 +449,9 @@ export default function SummaryPage() {
                         {periodSignal?.jpy_gap_ratio || '-'}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-center">
                       <span
-                        className={`text-2xl font-bold ${
+                        className={`text-xl sm:text-2xl font-bold ${
                           periodSignal?.jpy_fair_rate === 'O'
                             ? 'text-green-600'
                             : periodSignal?.jpy_fair_rate === 'X'
@@ -472,25 +472,25 @@ export default function SummaryPage() {
 
       {/* 달러 환율 테이블 */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">💵 달러 USD-KRW</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">💵 달러 USD-KRW</h2>
         {usdBankRates?.INVESTING && (
-          <div className="mb-4">
-            <div className="text-sm text-gray-600 mb-2">
+          <div className="mb-3 sm:mb-4">
+            <div className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
               Investing {new Date().toLocaleString('ko-KR')}
             </div>
-            <div className="text-3xl font-bold">
+            <div className="text-2xl sm:text-3xl font-bold">
               {usdBankRates.INVESTING.rate.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
           </div>
         )}
-        <div className="bg-white rounded-2xl p-6 shadow-sm overflow-x-auto">
-          <table className="w-full">
+        <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm overflow-x-auto">
+          <table className="w-full text-sm sm:text-base min-w-[500px]">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-900">은행</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-900">기준환율</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-900">GAP</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-900">기준시간</th>
+                <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">은행</th>
+                <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">기준환율</th>
+                <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">GAP</th>
+                <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">기준시간</th>
               </tr>
             </thead>
             <tbody>
@@ -508,10 +508,10 @@ export default function SummaryPage() {
                 if (!data) {
                   return (
                     <tr key={key} className="border-b border-gray-100">
-                      <td className="py-3 px-4 font-medium text-gray-900">{bankNames[key]}</td>
-                      <td className="py-3 px-4 text-right">조회 실패</td>
-                      <td className="py-3 px-4 text-right">N/A</td>
-                      <td className="py-3 px-4 text-right"></td>
+                      <td className="py-2 px-2 sm:py-3 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{bankNames[key]}</td>
+                      <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm">조회 실패</td>
+                      <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm">N/A</td>
+                      <td className="py-2 px-2 sm:py-3 sm:px-4 text-right"></td>
                     </tr>
                   );
                 }
@@ -522,14 +522,14 @@ export default function SummaryPage() {
 
                 return (
                   <tr key={key} className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">{bankNames[key]}</td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{bankNames[key]}</td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm">
                       {data.rate.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
-                    <td className={`py-3 px-4 text-right ${gap && gap >= 0 ? 'text-red-600' : gap && gap < 0 ? 'text-blue-600' : ''}`}>
+                    <td className={`py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm ${gap && gap >= 0 ? 'text-red-600' : gap && gap < 0 ? 'text-blue-600' : ''}`}>
                       {gapStr}
                     </td>
-                    <td className="py-3 px-4 text-right text-sm text-gray-600">{data.time}</td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs text-gray-600">{data.time}</td>
                   </tr>
                 );
               })}
@@ -540,25 +540,25 @@ export default function SummaryPage() {
 
       {/* 엔화 환율 테이블 */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">💴 엔 JPY-KRW (100엔)</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">💴 엔 JPY-KRW (100엔)</h2>
         {jpyBankRates?.INVESTING && (
-          <div className="mb-4">
-            <div className="text-sm text-gray-600 mb-2">
+          <div className="mb-3 sm:mb-4">
+            <div className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
               Investing {new Date().toLocaleString('ko-KR')}
             </div>
-            <div className="text-3xl font-bold">
+            <div className="text-2xl sm:text-3xl font-bold">
               {jpyBankRates.INVESTING.rate.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
           </div>
         )}
-        <div className="bg-white rounded-2xl p-6 shadow-sm overflow-x-auto">
-          <table className="w-full">
+        <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm overflow-x-auto">
+          <table className="w-full text-sm sm:text-base min-w-[500px]">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-900">은행</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-900">기준환율</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-900">GAP</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-900">기준시간</th>
+                <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">은행</th>
+                <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">기준환율</th>
+                <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">GAP</th>
+                <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">기준시간</th>
               </tr>
             </thead>
             <tbody>
@@ -576,10 +576,10 @@ export default function SummaryPage() {
                 if (!data) {
                   return (
                     <tr key={key} className="border-b border-gray-100">
-                      <td className="py-3 px-4 font-medium text-gray-900">{bankNames[key]}</td>
-                      <td className="py-3 px-4 text-right">조회 실패</td>
-                      <td className="py-3 px-4 text-right">N/A</td>
-                      <td className="py-3 px-4 text-right"></td>
+                      <td className="py-2 px-2 sm:py-3 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{bankNames[key]}</td>
+                      <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm">조회 실패</td>
+                      <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm">N/A</td>
+                      <td className="py-2 px-2 sm:py-3 sm:px-4 text-right"></td>
                     </tr>
                   );
                 }
@@ -590,14 +590,14 @@ export default function SummaryPage() {
 
                 return (
                   <tr key={key} className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">{bankNames[key]}</td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{bankNames[key]}</td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm">
                       {data.rate.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
-                    <td className={`py-3 px-4 text-right ${gap && gap >= 0 ? 'text-red-600' : gap && gap < 0 ? 'text-blue-600' : ''}`}>
+                    <td className={`py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm ${gap && gap >= 0 ? 'text-red-600' : gap && gap < 0 ? 'text-blue-600' : ''}`}>
                       {gapStr}
                     </td>
-                    <td className="py-3 px-4 text-right text-sm text-gray-600">{data.time}</td>
+                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs text-gray-600">{data.time}</td>
                   </tr>
                 );
               })}

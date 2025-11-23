@@ -23,15 +23,15 @@ export default function MetricCard({
   className,
 }: MetricCardProps) {
   return (
-    <TossCard className={clsx('mb-4', className)}>
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-2">
-          {icon && <span className="text-2xl">{icon}</span>}
-          <h3 className="text-sm font-medium text-gray-600">{title}</h3>
+    <TossCard className={clsx('mb-3 sm:mb-4', className)}>
+      <div className="flex items-start justify-between mb-2 sm:mb-4">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {icon && <span className="text-xl sm:text-2xl">{icon}</span>}
+          <h3 className="text-xs sm:text-sm font-medium text-gray-600">{title}</h3>
         </div>
         {trend && trendValue && (
           <span
-            className={clsx('text-sm font-semibold', {
+            className={clsx('text-xs sm:text-sm font-semibold', {
               'text-green-600': trend === 'up',
               'text-red-600': trend === 'down',
               'text-gray-600': trend === 'neutral',
@@ -42,10 +42,10 @@ export default function MetricCard({
         )}
       </div>
       
-      <div className="mb-2">
-        <div className="text-3xl font-bold text-gray-900">{value}</div>
+      <div className="mb-1 sm:mb-2">
+        <div className="text-2xl sm:text-3xl font-bold text-gray-900">{value}</div>
         {subtitle && (
-          <div className="text-sm text-gray-500 mt-1">{subtitle}</div>
+          <div className="text-xs sm:text-sm text-gray-500 mt-1">{subtitle}</div>
         )}
       </div>
     </TossCard>

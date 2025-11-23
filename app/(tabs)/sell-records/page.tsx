@@ -84,14 +84,14 @@ function SellRecordsPageContent() {
   const dashboard = calculateDashboard();
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">매도 기록</h1>
+    <div className="space-y-4 sm:space-y-6 animate-fade-in px-2 sm:px-0">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">매도 기록</h1>
 
       {/* 통화 선택 */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-3 sm:gap-4 mb-4 sm:mb-6">
         <button
           onClick={() => setCurrency('dollar')}
-          className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+          className={`flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-semibold transition-all ${
             currency === 'dollar'
               ? 'bg-toss-blue-500 text-white shadow-lg'
               : 'bg-white text-gray-700 border border-gray-300'
@@ -101,7 +101,7 @@ function SellRecordsPageContent() {
         </button>
         <button
           onClick={() => setCurrency('jpy')}
-          className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+          className={`flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-semibold transition-all ${
             currency === 'jpy'
               ? 'bg-toss-blue-500 text-white shadow-lg'
               : 'bg-white text-gray-700 border border-gray-300'
@@ -112,12 +112,12 @@ function SellRecordsPageContent() {
       </div>
 
       {/* 기간 필터 */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2">
         {(['all', 1, 3, 12] as const).map((p) => (
           <button
             key={p}
             onClick={() => setPeriod(p)}
-            className={`px-4 py-2 rounded-xl font-medium transition-all ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
               period === p
                 ? 'bg-toss-blue-500 text-white'
                 : 'bg-white text-gray-700 border border-gray-300'
@@ -130,8 +130,8 @@ function SellRecordsPageContent() {
 
       {/* 대시보드 */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">📊 대시보드</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">📊 대시보드</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <MetricCard
             title="총 매수 금액"
             value={formatKrw(dashboard.totalPurchaseKrw)}
@@ -159,30 +159,30 @@ function SellRecordsPageContent() {
 
       {/* 매도 기록 목록 */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">📋 매도 기록</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">📋 매도 기록</h2>
         {filteredRecords.length === 0 ? (
           <TossCard>
-            <p className="text-center text-gray-500 py-8">
+            <p className="text-center text-gray-500 py-6 sm:py-8 text-sm sm:text-base">
               매도 기록이 없습니다.
             </p>
           </TossCard>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {filteredRecords.map((record) => (
               <TossCard key={record.id}>
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-gray-900">
+                <div className="flex justify-between items-start mb-3 sm:mb-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
+                      <h4 className="font-semibold text-gray-900 text-sm sm:text-base">
                         {formatDate(record.sell_date)}
                       </h4>
                       {(record as any).sell_number && (
-                        <span className="text-xs bg-toss-blue-100 text-toss-blue-700 px-2 py-1 rounded-full font-medium">
+                        <span className="text-xs bg-toss-blue-100 text-toss-blue-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium">
                           #{((record as any).sell_number)}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
                       {currency === 'dollar' ? (
                         <>
                           ${((record as DollarSellRecord).usd_amount || 0).toLocaleString()}
@@ -195,19 +195,19 @@ function SellRecordsPageContent() {
                       {' '}@ {(record.exchange_rate || 0).toLocaleString()}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500">매도 금액</p>
-                    <p className="font-semibold text-gray-900">
+                  <div className="text-right ml-2 sm:ml-4 flex-shrink-0">
+                    <p className="text-xs sm:text-sm text-gray-500">매도 금액</p>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base">
                       {formatKrw(record.sell_krw || 0)}
                     </p>
                   </div>
                 </div>
 
-                <div className="border-t border-gray-200 pt-4 mt-4">
+                <div className="border-t border-gray-200 pt-3 sm:pt-4 mt-3 sm:mt-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">실현 손익</span>
+                    <span className="text-xs sm:text-sm text-gray-600">실현 손익</span>
                     <span
-                      className={`font-semibold ${
+                      className={`font-semibold text-sm sm:text-base ${
                         (record.profit_loss || 0) >= 0 ? 'text-green-600' : 'text-red-600'
                       }`}
                     >
@@ -218,7 +218,7 @@ function SellRecordsPageContent() {
                   </div>
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-3 sm:mt-4">
                   <button
                     onClick={() => {
                       if (confirm('정말 삭제하시겠습니까?')) {
@@ -229,7 +229,7 @@ function SellRecordsPageContent() {
                         }
                       }
                     }}
-                    className="text-sm text-red-600 hover:text-red-700"
+                    className="text-xs sm:text-sm text-red-600 hover:text-red-700"
                   >
                     삭제
                   </button>
