@@ -61,14 +61,48 @@ export default function SummaryPage() {
     const fetchBankRates = async () => {
       setBankRatesLoading(true);
       try {
-        const [usd, jpy] = await Promise.all([
-          fetch('/api/exchange-rates/banks?currency=USD').then(res => res.json()),
-          fetch('/api/exchange-rates/banks?currency=JPY').then(res => res.json()),
+        const [usdResponse, jpyResponse] = await Promise.all([
+          fetch('/api/exchange-rates/banks?currency=USD'),
+          fetch('/api/exchange-rates/banks?currency=JPY'),
         ]);
-        setUsdBankRates(usd);
-        setJpyBankRates(jpy);
+
+        if (!usdResponse.ok) {
+          console.error('USD 환율 조회 실패:', usdResponse.status, usdResponse.statusText);
+        }
+        if (!jpyResponse.ok) {
+          console.error('JPY 환율 조회 실패:', jpyResponse.status, jpyResponse.statusText);
+        }
+
+        const [usd, jpy] = await Promise.all([
+          usdResponse.ok ? usdResponse.json() : null,
+          jpyResponse.ok ? jpyResponse.json() : null,
+        ]);
+
+        if (usd) {
+          console.log('USD 환율 조회 성공:', {
+            totalBanks: Object.keys(usd).length,
+            successfulBanks: Object.values(usd).filter((r: any) => r !== null).length,
+          });
+          setUsdBankRates(usd);
+        } else {
+          console.error('USD 환율 데이터가 null입니다.');
+        }
+
+        if (jpy) {
+          console.log('JPY 환율 조회 성공:', {
+            totalBanks: Object.keys(jpy).length,
+            successfulBanks: Object.values(jpy).filter((r: any) => r !== null).length,
+            investingRate: jpy.INVESTING?.rate,
+          });
+          setJpyBankRates(jpy);
+        } else {
+          console.error('JPY 환율 데이터가 null입니다.');
+        }
       } catch (error) {
         console.error('은행별 환율 조회 실패:', error);
+        if (error instanceof Error) {
+          console.error('에러 상세:', error.message, error.stack);
+        }
       } finally {
         setBankRatesLoading(false);
       }
@@ -483,14 +517,14 @@ export default function SummaryPage() {
             </div>
           </div>
         )}
-        <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm overflow-x-auto">
-          <table className="w-full text-sm sm:text-base min-w-[500px]">
+        <div className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-4 shadow-sm">
+          <table className="w-full text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">은행</th>
-                <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">기준환율</th>
-                <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">GAP</th>
-                <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">기준시간</th>
+                <th className="text-left py-1.5 px-1 sm:py-2 sm:px-2 font-semibold text-gray-900">은행</th>
+                <th className="text-right py-1.5 px-1 sm:py-2 sm:px-2 font-semibold text-gray-900">기준환율</th>
+                <th className="text-right py-1.5 px-1 sm:py-2 sm:px-2 font-semibold text-gray-900">GAP</th>
+                <th className="text-right py-1.5 px-1 sm:py-2 sm:px-2 font-semibold text-gray-900">기준시간</th>
               </tr>
             </thead>
             <tbody>
@@ -508,10 +542,10 @@ export default function SummaryPage() {
                 if (!data) {
                   return (
                     <tr key={key} className="border-b border-gray-100">
-                      <td className="py-2 px-2 sm:py-3 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{bankNames[key]}</td>
-                      <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm">조회 실패</td>
-                      <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm">N/A</td>
-                      <td className="py-2 px-2 sm:py-3 sm:px-4 text-right"></td>
+                      <td className="py-1.5 px-1 sm:py-2 sm:px-2 font-medium text-gray-900 text-xs sm:text-sm whitespace-nowrap">{bankNames[key]}</td>
+                      <td className="py-1.5 px-1 sm:py-2 sm:px-2 text-right text-xs sm:text-sm whitespace-nowrap">조회 실패</td>
+                      <td className="py-1.5 px-1 sm:py-2 sm:px-2 text-right text-xs sm:text-sm whitespace-nowrap">N/A</td>
+                      <td className="py-1.5 px-1 sm:py-2 sm:px-2 text-right text-xs text-gray-600 whitespace-nowrap"></td>
                     </tr>
                   );
                 }
@@ -522,14 +556,14 @@ export default function SummaryPage() {
 
                 return (
                   <tr key={key} className="border-b border-gray-100">
-                    <td className="py-2 px-2 sm:py-3 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{bankNames[key]}</td>
-                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm">
+                    <td className="py-1.5 px-1 sm:py-2 sm:px-2 font-medium text-gray-900 text-xs sm:text-sm whitespace-nowrap">{bankNames[key]}</td>
+                    <td className="py-1.5 px-1 sm:py-2 sm:px-2 text-right text-xs sm:text-sm whitespace-nowrap">
                       {data.rate.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
-                    <td className={`py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm ${gap && gap >= 0 ? 'text-red-600' : gap && gap < 0 ? 'text-blue-600' : ''}`}>
+                    <td className={`py-1.5 px-1 sm:py-2 sm:px-2 text-right text-xs sm:text-sm whitespace-nowrap ${gap && gap >= 0 ? 'text-red-600' : gap && gap < 0 ? 'text-blue-600' : ''}`}>
                       {gapStr}
                     </td>
-                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs text-gray-600">{data.time}</td>
+                    <td className="py-1.5 px-1 sm:py-2 sm:px-2 text-right text-xs text-gray-600 whitespace-nowrap">{data.time}</td>
                   </tr>
                 );
               })}
@@ -551,14 +585,14 @@ export default function SummaryPage() {
             </div>
           </div>
         )}
-        <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm overflow-x-auto">
-          <table className="w-full text-sm sm:text-base min-w-[500px]">
+        <div className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-4 shadow-sm">
+          <table className="w-full text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">은행</th>
-                <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">기준환율</th>
-                <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">GAP</th>
-                <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-semibold text-gray-900 text-xs sm:text-sm">기준시간</th>
+                <th className="text-left py-1.5 px-1 sm:py-2 sm:px-2 font-semibold text-gray-900">은행</th>
+                <th className="text-right py-1.5 px-1 sm:py-2 sm:px-2 font-semibold text-gray-900">기준환율</th>
+                <th className="text-right py-1.5 px-1 sm:py-2 sm:px-2 font-semibold text-gray-900">GAP</th>
+                <th className="text-right py-1.5 px-1 sm:py-2 sm:px-2 font-semibold text-gray-900">기준시간</th>
               </tr>
             </thead>
             <tbody>
@@ -576,10 +610,10 @@ export default function SummaryPage() {
                 if (!data) {
                   return (
                     <tr key={key} className="border-b border-gray-100">
-                      <td className="py-2 px-2 sm:py-3 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{bankNames[key]}</td>
-                      <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm">조회 실패</td>
-                      <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm">N/A</td>
-                      <td className="py-2 px-2 sm:py-3 sm:px-4 text-right"></td>
+                      <td className="py-1.5 px-1 sm:py-2 sm:px-2 font-medium text-gray-900 text-xs sm:text-sm whitespace-nowrap">{bankNames[key]}</td>
+                      <td className="py-1.5 px-1 sm:py-2 sm:px-2 text-right text-xs sm:text-sm whitespace-nowrap">조회 실패</td>
+                      <td className="py-1.5 px-1 sm:py-2 sm:px-2 text-right text-xs sm:text-sm whitespace-nowrap">N/A</td>
+                      <td className="py-1.5 px-1 sm:py-2 sm:px-2 text-right text-xs text-gray-600 whitespace-nowrap"></td>
                     </tr>
                   );
                 }
@@ -590,14 +624,14 @@ export default function SummaryPage() {
 
                 return (
                   <tr key={key} className="border-b border-gray-100">
-                    <td className="py-2 px-2 sm:py-3 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{bankNames[key]}</td>
-                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm">
+                    <td className="py-1.5 px-1 sm:py-2 sm:px-2 font-medium text-gray-900 text-xs sm:text-sm whitespace-nowrap">{bankNames[key]}</td>
+                    <td className="py-1.5 px-1 sm:py-2 sm:px-2 text-right text-xs sm:text-sm whitespace-nowrap">
                       {data.rate.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
-                    <td className={`py-2 px-2 sm:py-3 sm:px-4 text-right text-xs sm:text-sm ${gap && gap >= 0 ? 'text-red-600' : gap && gap < 0 ? 'text-blue-600' : ''}`}>
+                    <td className={`py-1.5 px-1 sm:py-2 sm:px-2 text-right text-xs sm:text-sm whitespace-nowrap ${gap && gap >= 0 ? 'text-red-600' : gap && gap < 0 ? 'text-blue-600' : ''}`}>
                       {gapStr}
                     </td>
-                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-xs text-gray-600">{data.time}</td>
+                    <td className="py-1.5 px-1 sm:py-2 sm:px-2 text-right text-xs text-gray-600 whitespace-nowrap">{data.time}</td>
                   </tr>
                 );
               })}

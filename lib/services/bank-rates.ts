@@ -992,6 +992,52 @@ export async function getAllBankRates(currency: string = 'USD'): Promise<{
   NH: RateData | null;
   INVESTING: RateData | null;
 }> {
+  const upperCurrency = currency.toUpperCase();
+  console.log(`[getAllBankRates] Starting to fetch rates for ${upperCurrency}`);
+  
+  const results = await Promise.allSettled([
+    getKbRate(upperCurrency).catch(err => {
+      console.error(`[getAllBankRates] KB failed for ${upperCurrency}:`, err);
+      return null;
+    }),
+    getShinhanRate(upperCurrency).catch(err => {
+      console.error(`[getAllBankRates] SHINHAN failed for ${upperCurrency}:`, err);
+      return null;
+    }),
+    getHanaRate(upperCurrency).catch(err => {
+      console.error(`[getAllBankRates] HANA failed for ${upperCurrency}:`, err);
+      return null;
+    }),
+    getWooriRate(upperCurrency).catch(err => {
+      console.error(`[getAllBankRates] WOORI failed for ${upperCurrency}:`, err);
+      return null;
+    }),
+    getIbkRate(upperCurrency).catch(err => {
+      console.error(`[getAllBankRates] IBK failed for ${upperCurrency}:`, err);
+      return null;
+    }),
+    getScRate(upperCurrency).catch(err => {
+      console.error(`[getAllBankRates] SC failed for ${upperCurrency}:`, err);
+      return null;
+    }),
+    getBusanRate(upperCurrency).catch(err => {
+      console.error(`[getAllBankRates] BUSAN failed for ${upperCurrency}:`, err);
+      return null;
+    }),
+    getImbankRate(upperCurrency).catch(err => {
+      console.error(`[getAllBankRates] IMBANK failed for ${upperCurrency}:`, err);
+      return null;
+    }),
+    getNhRate(upperCurrency).catch(err => {
+      console.error(`[getAllBankRates] NH failed for ${upperCurrency}:`, err);
+      return null;
+    }),
+    getInvestingRate(upperCurrency).catch(err => {
+      console.error(`[getAllBankRates] INVESTING failed for ${upperCurrency}:`, err);
+      return null;
+    }),
+  ]);
+
   const [
     kbResult,
     shinhanResult,
@@ -1003,18 +1049,12 @@ export async function getAllBankRates(currency: string = 'USD'): Promise<{
     imbankResult,
     nhResult,
     investingResult,
-  ] = await Promise.all([
-    getKbRate(currency),
-    getShinhanRate(currency),
-    getHanaRate(currency),
-    getWooriRate(currency),
-    getIbkRate(currency),
-    getScRate(currency),
-    getBusanRate(currency),
-    getImbankRate(currency),
-    getNhRate(currency),
-    getInvestingRate(currency),
-  ]);
+  ] = results.map(result => 
+    result.status === 'fulfilled' ? result.value : null
+  );
+
+  const successfulCount = results.filter(r => r.status === 'fulfilled' && r.value !== null).length;
+  console.log(`[getAllBankRates] Completed for ${upperCurrency}: ${successfulCount}/10 banks succeeded`);
 
   return {
     KB: kbResult,
